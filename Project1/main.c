@@ -357,24 +357,21 @@ int single_execute (char *argv[]) // Executes a program
 {
 	pid_t pid;
 	int status;
-	//char *env[] = {PATH, NULL};
-
-	//char *argvAux[] = {"echo", "hello world", NULL};  // This line to be removed once the main flow works
 	
 	// Fork
 	pid = fork();
 	
 	
-	if (pid == 0) // Child process
+	if (pid == 0) // Child branch
 	{
 		execvp (argv[0], &argv[0]); // If it returns from the exec then it has been an error
 		printf("Error executing command %s ", argv[0]);
 		perror(NULL);
 		return -1;
 	}
-	else if (pid > 0)
+	else if (pid > 0) // Parent branch
 	{
-		// Parent
+		
 		pid = wait(&status);
 	
 		if (pid == -1) // Error. Possible errors: [ECHILD] [EFAULT] or [EAGAIN]
