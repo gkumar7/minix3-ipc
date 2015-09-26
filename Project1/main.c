@@ -294,6 +294,7 @@ int execute_command (int argc, char * argv[], int command_option) {
   }
   else if (command_option == EXEC_PROGRAM) {
     /* TODO: Execute EXEC_PROGRAM with received params. Preprocess them if necessary.*/
+	single_execute(argv);
     return 0;
   }
   else if (command_option == ALARM) {
@@ -348,46 +349,49 @@ int recognize_and_exec (char *command_str) {
   return execute_command (argc,argv,command_option);
 }
 
-/*int single_execute (char *argv[], int argc) // Executes a program
+int single_execute (char *argv[]) // Executes a program
 {
-  pid_t pid;
-  int status;
-  char *new_env[] = { NULL }; // This has to be changed
+	pid_t pid;
+	int status;
+	//char *env[] = {PATH, NULL};
 
+	//char *argvAux[] = {"echo", "hello world", NULL};  // This line to be removed once the main flow works
+	
+	// Fork
+	pid = fork();
+	
+	
+	if (pid == 0) // Child process
+	{
+		execvp (argv[0], &argv[0]); // If it returns from the exec then it has been an error
+		printf("Error executing command %s ", argv[0]);
+		perror(NULL);
+		return -1;
+	}
+	else if (pid > 0)
+	{
+		// Parent
+		pid = wait(&status);
+	
+		if (pid == -1) // Error. Possible errors: [ECHILD] [EFAULT] or [EAGAIN]
+		{
+			return -1;
+		}
+		else // Child ended with no errors (Normal way?) Maybe we don't have to do anything at all in this branch
+		{
 
-  // Fork
-  pid = fork();
-
-
-  if (pid == 0)
-  {
-    // Child
-    //int execve(const char *name, char *const argv[], char *const envp[])
-    execve (argv[0], &argv[0] , new_env); // If it returns from the exec then it has been an error
-    printf("Error executing command %s\n", argv[0]);
-  }
-  else if (pid > 0)
-  {
-    // Parent
-    pid = wait(&status);
-
-    if (pid == -1) // Error. Possible errors: [ECHILD] [EFAULT] or [EAGAIN]
-    {
-
-    }
-    else // Child ended with no errors (Normal way?) Maybe we don't have to do anything at all in this branch
-    {
-
-    }
-  }
-  else // Error when calling fork
-  {
-    // error
-    // Possible errors: [EAGAIN]  or [ENOMEM]
-
-  }
-
-}*/
+		}
+	}
+	else // Error when calling fork
+	{ 
+		// error
+		// Possible errors: [EAGAIN]  or [ENOMEM]  
+		return -1; 
+               
+	}
+	
+	return 0;
+}
 
 
 int main(int argc, const char * argv[]) {
