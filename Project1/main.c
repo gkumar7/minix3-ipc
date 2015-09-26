@@ -95,17 +95,17 @@ int execute_profile (void) {
     char *rest = strtok(NULL, "");
 
     if (strcmp(var_type, "PATH") == 0) {
-      strtok(rest,"\n");
+      if (rest[strlen(rest)-1]=='\n') strtok(rest,"\n");
       memcpy(PATH, rest, strlen(rest));
     }
     else if (strcmp(var_type, "HOME") == 0) {
-      strtok(rest,"\n");
+      if (rest[strlen(rest)-1]=='\n') strtok(rest,"\n");
       memcpy(HOME, rest, strlen(rest));
     }
     else if (strcmp(var_type, "ALARM") == 0) {
       char *alarm_arg;
       memcpy(alarm_arg, rest, strlen(rest));
-      strtok(alarm_arg,"\n");
+      if (rest[strlen(rest)-1]=='\n') strtok(alarm_arg,"\n");
       if (strcmp(alarm_arg, "ON") == 0) {
         alarm_state=ON;
       }
@@ -407,15 +407,15 @@ int single_execute (char *argv[], int argc) // Executes a program
   char *exec_args [argc + 1]; // Adding one for inserting NULL at the end
   char name_from_alias[50];
 
-	// alias thing
-	if (find_name_by_alias (argv[0], name_from_alias)) // If its an alias, change its value for the original one
-	{
-		exec_args[0] = name_from_alias;
-	}
-	else // If not, just use that argument for the exec
-	{
-		exec_args[0] = argv[0];
-	}
+  // alias thing
+  if (find_name_by_alias (argv[0], name_from_alias)) // If its an alias, change its value for the original one
+  {
+    exec_args[0] = name_from_alias;
+  }
+  else // If not, just use that argument for the exec
+  {
+    exec_args[0] = argv[0];
+  }
 
   for (i = 1; i < argc; i++)
   {
@@ -442,6 +442,7 @@ int single_execute (char *argv[], int argc) // Executes a program
   {
     if (alarm_state == ON) alarm(ALARM_TIME);
     pid = wait(&status);
+    if (alarm_state == ON) alarm(0);
 
     if (pid == -1) // Error. Possible errors: [ECHILD] [EFAULT] or [EAGAIN]
     {
@@ -460,20 +461,8 @@ int single_execute (char *argv[], int argc) // Executes a program
 }
 
 void kill_child(int sig) {
-  char *response = NULL;
-  while (response==NULL) {
-    printf("Five minutes have passed since execution. Abort program? Y/N >> ");
-    read_command (response);
-    //If Y kill program
-    if (!strcmp(response,"Y") || !strcmp(response,"y")) {
-      kill(pid,SIGKILL);
-
-    }
-    //If not Y and not N, try again. N does nothing.
-    else if (strcmp(response,"N") && strcmp(response,"n")) {
-      response = NULL;
-    }
-  }
+  //TODO: show confirmation alert.
+  kill(pid,SIGKILL);
 }
 
 int main(int argc, const char * argv[]) {
@@ -491,7 +480,6 @@ int main(int argc, const char * argv[]) {
     exit(-1);
   }
 
-  /* TODO: cd HOME */
   /* Go to user specified HOME directory */
   if (chdir(HOME) != 0){
     print_error(10);
