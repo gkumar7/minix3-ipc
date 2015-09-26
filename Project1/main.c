@@ -14,7 +14,7 @@
 
 #define MAX_ARGS       20
 #define MAX_COMMAND_LEN 4096
-#define MAXLINE 100
+#define MAXLINE 1000
 #define PROFILE "PROFILE"
 #define TRUE 1
 #define FALSE 0
@@ -293,6 +293,7 @@ int execute_command (int argc, char ** argv,int command_option) {
   }
   else if (command_option == EXEC_PROGRAM) {
     /* TODO: Execute EXEC_PROGRAM with received params. Preprocess them if necessary.*/
+	single_execute(argv);
     return 0;
   }
   else if (command_option == ALARM) {
@@ -349,23 +350,22 @@ int recognize_and_exec (char *command_str) {
   return execute_command (argc,argv,command_option);
 }
 
-int single_execute (char *argv[], int argc) // Executes a program
+int single_execute (char *argv[]) // Executes a program
 {
 	pid_t pid;
 	int status;
-	char *new_env[] = { NULL }; // This has to be changed
+	char *env[] = {PATH, NULL};
 
+	//char *argvAux[] = {"echo", "hello world", NULL};  // This line to be removed once the main flow works
 	
 	// Fork
 	pid = fork();
-
 	
-	if (pid == 0)
+	
+	if (pid == 0) // Child process
 	{
-		// Child
-		//int execve(const char *name, char *const argv[], char *const envp[])
-		execve (argv[0], &argv[0] , new_env); // If it returns from the exec then it has been an error
-		printf("Error executing command %s\n", argv[0]);
+		execvp (argv[0], &argv[0]); // If it returns from the exec then it has been an error
+		perror("Error executing command: ");
 	}
 	else if (pid > 0)
 	{
@@ -387,8 +387,8 @@ int single_execute (char *argv[], int argc) // Executes a program
 		// Possible errors: [EAGAIN]  or [ENOMEM]   
                
 	}
-
 }
+
 
 
 int main(int argc, const char * argv[]) {
@@ -410,11 +410,11 @@ int main(int argc, const char * argv[]) {
 
   /* TODO: set alarms according to PROFILE */
 
-
+  //char* aux[] = {"ls", "-la",  NULL};
+  //single_execute(aux);
   while (1) {
 
     fprintf(stdout,"%s ",">>");
-
     if (read_command(command_str)<0)
       break;
 
