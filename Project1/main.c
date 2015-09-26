@@ -241,7 +241,7 @@ int alias_command (char *original_name, char *alias_name) {
 /* Entry point for all the commands */
 
 int read_command (char *command_str) {
-  if ((fgets(command_str, sizeof(command_str), stdin)) == NULL) return -1;
+  if ((fgets(command_str, MAX_COMMAND_LEN * sizeof(char), stdin)) == NULL) return -1;
 
   command_str[strlen(command_str) - 1] = '\0';
   return 0;
