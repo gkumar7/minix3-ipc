@@ -6,10 +6,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 #define MAX_ARGS       20
 #define MAX_COMMAND_LEN 4096
-#define MAXLINE 1000
+#define MAXLINE 100
 #define PROFILE "PROFILE"
 
 /* Global Variables */
@@ -76,10 +79,50 @@ int recognize_and_exec (char *command_str) {
   return 0;
 }
 
+int single_execute (char *argv[], int argc) // Executes a program
+{
+	pid_t pid;
+	int status;
+	char *new_env[] = { NULL }; // This has to be changed
+
+	
+	// Fork
+	pid = fork();
+
+	
+	if (pid == 0)
+	{
+		// Child
+		//int execve(const char *name, char *const argv[], char *const envp[])
+		execve (argv[0], &argv[0] , new_env); // If it returns from the exec then it has been an error
+		printf("Error executing command %s\n", argv[0]);
+	}
+	else if (pid > 0)
+	{
+		// Parent
+		pid = wait(&status);
+	
+		if (pid == -1) // Error. Possible errors: [ECHILD] [EFAULT] or [EAGAIN]
+		{
+
+		}
+		else // Child ended with no errors (Normal way?) Maybe we don't have to do anything at all in this branch
+		{
+
+		}
+	}
+	else // Error when calling fork
+	{ 
+		// error
+		// Possible errors: [EAGAIN]  or [ENOMEM]   
+               
+	}
+
+}
+
 int main(int argc, const char * argv[]) {
 
   char *command_str = (char*) malloc(MAX_COMMAND_LEN * sizeof(char));
-
   if (execute_profile()<0) {
     //If PROFILE file cannot be read
     printError(1);
