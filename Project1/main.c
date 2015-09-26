@@ -68,6 +68,10 @@ void print_error (int error_code) {
   }
 }
 
+/* FUNCTION HEADERS */
+
+int single_execute (char *argv[]);
+
 /* PROFILE */
 
 int execute_profile (void) {
@@ -375,17 +379,19 @@ int single_execute (char *argv[]) // Executes a program
 	
 		if (pid == -1) // Error. Possible errors: [ECHILD] [EFAULT] or [EAGAIN]
 		{
+			perror("Error when waiting for command execution ");
 			return -1;
 		}
 		else // Child ended with no errors (Normal way?) Maybe we don't have to do anything at all in this branch
 		{
-
+			
 		}
 	}
 	else // Error when calling fork
 	{ 
 		// error
 		// Possible errors: [EAGAIN]  or [ENOMEM]  
+		perror("Error when calling fork ");
 		return -1; 
                
 	}
