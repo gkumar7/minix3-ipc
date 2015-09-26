@@ -146,8 +146,12 @@ int find_name_by_alias (char *alias_name, char *dest_string) {
 int add_alias_node (char *original_name, char *alias_name) {
   /*create node*/
   struct alias_node *pnode = (struct alias_node*)malloc(sizeof(struct alias_node));
-  pnode->original_name=original_name;
-  pnode->alias_name=alias_name;
+  char *o_name = (char*) malloc(MAXLINE*sizeof(char));
+  char *a_name = (char*) malloc(MAXLINE*sizeof(char));
+  memcpy(o_name,original_name,MAXLINE*sizeof(char));
+  memcpy(a_name,alias_name,MAXLINE*sizeof(char));
+  pnode->original_name=o_name;
+  pnode->alias_name=a_name;
   /*Update list*/
   pnode->previous=NULL;
   pnode->next=&alias_list;
@@ -242,11 +246,25 @@ int alias_command (char *original_name, char *alias_name) {
   return -1;
 }
 
-/* Entrance point for all the commands */
+/* Entry point for all the commands */
 
 int read_command (char *command_str) {
+  int n=0;
+  char *c=(char*) malloc(sizeof(char)); 
+  char *p=command_str;
+  while ((*c)!='\n') {
+    fgets(c, 2, stdin);
+    if (*c!='\0') {
+      if (n==MAX_COMMAND_LEN) return -1;
+      memcpy(p,c,sizeof(char));
+      n++;
+      p++;
+    }
+  }
+  /*
   if (fgets(command_str, sizeof(command_str), stdin) == NULL)
     return -1;
+  printf("Debug: fgets received %s\n",command_str);*/
   return 0;
 }
 
@@ -313,18 +331,18 @@ int recognize_and_exec (char *command_str) {
   int command_option;
 
   //Case IF command (special case: argument is a command itself)
-  if ((strlen(command_str)>=3) && (strncmp(command_str,"if ",3))) {
+  if ((strlen(command_str)>=3) && (!strncmp(command_str,"if ",3))) {
     /* TODO: prepare args to call IF */
     command_option=IF;
   }
   else {
     //Case ALIAS command
-    if ((strlen(command_str)>=6) && (strncmp(command_str,"alias ",6))) {
+    if ((strlen(command_str)>=6) && (!strncmp(command_str,"alias ",6))) {
       command_option=ALIAS;
       printf("Debug: %s\n", "Alias command detected");
     }
     //Case ALARM ON/OFF
-    else if ((strlen(command_str)>=6) && (strncmp(command_str,"alarm ",6))) {
+    else if ((strlen(command_str)>=6) && (!strncmp(command_str,"alarm ",6))) {
        /* TODO: prepare args to call ALARM ON/OFF */
       command_option=ALARM;
     } else {
@@ -336,59 +354,63 @@ int recognize_and_exec (char *command_str) {
     // First arg
     arg = strtok(command_str, " ");
     *argv = arg;
-
+    printf("Debug: program name=>%s\n",arg);
     // Remaining args
     while(arg != NULL) {
-      argc++;
       argv++;
       arg = strtok(NULL, " ");
-      *argv=arg;
+      if (arg!=NULL) {
+       *argv=arg;
+        printf("Debug: argv %i=>%s\n",argc,arg);
+        argc++;
+      }
     }
   }
-
+  printf("Debug: argc %i\n",argc);
+  printf("Debug: command option %i\n",command_option);
   return execute_command (argc,argv,command_option);
 }
 
-int single_execute (char *argv[], int argc) // Executes a program
+/*int single_execute (char *argv[], int argc) // Executes a program
 {
-	pid_t pid;
-	int status;
-	char *new_env[] = { NULL }; // This has to be changed
+  pid_t pid;
+  int status;
+  char *new_env[] = { NULL }; // This has to be changed
 
-	
-	// Fork
-	pid = fork();
+  
+  // Fork
+  pid = fork();
 
-	
-	if (pid == 0)
-	{
-		// Child
-		//int execve(const char *name, char *const argv[], char *const envp[])
-		execve (argv[0], &argv[0] , new_env); // If it returns from the exec then it has been an error
-		printf("Error executing command %s\n", argv[0]);
-	}
-	else if (pid > 0)
-	{
-		// Parent
-		pid = wait(&status);
-	
-		if (pid == -1) // Error. Possible errors: [ECHILD] [EFAULT] or [EAGAIN]
-		{
+  
+  if (pid == 0)
+  {
+    // Child
+    //int execve(const char *name, char *const argv[], char *const envp[])
+    execve (argv[0], &argv[0] , new_env); // If it returns from the exec then it has been an error
+    printf("Error executing command %s\n", argv[0]);
+  }
+  else if (pid > 0)
+  {
+    // Parent
+    pid = wait(&status);
+  
+    if (pid == -1) // Error. Possible errors: [ECHILD] [EFAULT] or [EAGAIN]
+    {
 
-		}
-		else // Child ended with no errors (Normal way?) Maybe we don't have to do anything at all in this branch
-		{
+    }
+    else // Child ended with no errors (Normal way?) Maybe we don't have to do anything at all in this branch
+    {
 
-		}
-	}
-	else // Error when calling fork
-	{ 
-		// error
-		// Possible errors: [EAGAIN]  or [ENOMEM]   
+    }
+  }
+  else // Error when calling fork
+  { 
+    // error
+    // Possible errors: [EAGAIN]  or [ENOMEM]   
                
-	}
+  }
 
-}
+}*/
 
 
 int main(int argc, const char * argv[]) {
@@ -417,7 +439,7 @@ int main(int argc, const char * argv[]) {
 
     if (read_command(command_str)<0)
       break;
-
+    printf("Debug: introduced command %s\n",command_str);
     if (recognize_and_exec(command_str)<0)
       print_error(3);
   }
