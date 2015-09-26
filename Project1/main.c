@@ -103,7 +103,7 @@ int execute_profile (void) {
       memcpy(HOME, rest, strlen(rest));
     }
     else if (strcmp(var_type, "ALARM") == 0) {
-      char *alarm_arg;
+      char alarm_arg[MAXLINE];
       memcpy(alarm_arg, rest, strlen(rest));
       if (rest[strlen(rest)-1]=='\n') strtok(alarm_arg,"\n");
       if (strcmp(alarm_arg, "ON") == 0) {
