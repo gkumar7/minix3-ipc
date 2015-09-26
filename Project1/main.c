@@ -26,6 +26,12 @@
 #define EXEC_PROGRAM 3
 #define ALARM 4
 
+// Alarm states
+
+#define ON 1
+#define OFF 0
+#define ALARM_TIME 1
+
 /*
  * Struct definitions
  */
@@ -41,6 +47,8 @@ struct alias_node {
 char PATH[MAXLINE], HOME[MAXLINE];
 char *PATH_SEPARATOR = ":";
 struct alias_node *alias_list;
+pid_t pid;
+int alarm_state;
 
 /* ERRORS */
 
@@ -82,11 +90,28 @@ int execute_profile (void) {
     var_type = strtok(line, "=");
 
     char *rest = strtok(NULL, "");
+    
     if (strcmp(var_type, "PATH") == 0) {
+      strtok(rest,"\n");
       memcpy(PATH, rest, strlen(rest));
     }
     else if (strcmp(var_type, "HOME") == 0) {
+      strtok(rest,"\n");
       memcpy(HOME, rest, strlen(rest));
+    }
+    else if (strcmp(var_type, "ALARM") == 0) {
+      char *alarm_arg;
+      memcpy(alarm_arg, rest, strlen(rest));
+      strtok(alarm_arg,"\n");
+      if (strcmp(alarm_arg, "ON") == 0) {
+        alarm_state=ON;
+      }
+      else if (strcmp(alarm_arg, "OFF") == 0) {
+        alarm_state=OFF;
+      } else {
+        fclose(profile_file);
+        return -1;
+      }
     }
     else if (strcmp(var_type, "\n") != 0) {
       fclose(profile_file);
@@ -289,12 +314,28 @@ int execute_command (int argc, char * argv[], int command_option) {
   }
   else if (command_option == EXEC_PROGRAM) {
     /* TODO: Execute EXEC_PROGRAM with received params. Preprocess them if necessary.*/
-	single_execute(argv, argc);
+  single_execute(argv, argc);
     return 0;
   }
   else if (command_option == ALARM) {
-    /* TODO: Execute ALARM ON/OFF with received params. Preprocess them if necessary.*/
-    return 0;
+
+    if (argc>2 || argc<=1) {
+      print_error(7);
+      return -1;
+    }
+    else {
+      char *alarm_arg = (char*) malloc(MAXLINE*sizeof(char));
+      strcpy(alarm_arg,argv[1]);
+      if (!strcmp(alarm_arg,"ON")||!strcmp(alarm_arg,"on")) {
+        alarm_state=ON;
+        return 0;
+      } 
+      else if (!strcmp(alarm_arg,"OFF")||!strcmp(alarm_arg,"off")) {
+        alarm_state=OFF;
+        return 0;
+      }
+    }
+    print_error(7);
   }
   return -1;
 }
@@ -337,8 +378,8 @@ int recognize_and_exec (char *command_str) {
     // Remaining args
     while ((arg = strtok(NULL, " ")) != NULL) {
       //strcat(*argv, arg);
-	argv[argc] = arg;
-      	argc++;
+  argv[argc] = arg;
+        argc++;
     }
 
   }
@@ -347,53 +388,70 @@ int recognize_and_exec (char *command_str) {
 
 int single_execute (char *argv[], int argc) // Executes a program
 {
-	pid_t pid;
-	int status, i;
-	//int argc = sizeof(argv) / sizeof(char*); // Getting the number of arguments
-	char *exec_args [argc + 1]; // Adding one for inserting NULL at the end
+  //pid_t pid;
+  int status, i;
+  //int argc = sizeof(argv) / sizeof(char*); // Getting the number of arguments
+  char *exec_args [argc + 1]; // Adding one for inserting NULL at the end
 
 
-	for (i = 0; i < argc; i++)
-	{
-		exec_args[i] = argv[i];
-	}
-	exec_args[argc] = NULL;
+  for (i = 0; i < argc; i++)
+  {
+    exec_args[i] = argv[i];
+  }
+  exec_args[argc] = NULL;
 
-	//printf ("Size before %i, size after %i\n", sizeof(argv) / sizeof(char*), argc);
-
-
-	// Fork
-	pid = fork();
+  //printf ("Size before %i, size after %i\n", sizeof(argv) / sizeof(char*), argc);
 
 
-	if (pid == 0) // Child branch
-	{
-		execvp (exec_args[0], &exec_args[0]); // If it returns from the exec then it has been an error
-		printf("Error executing command %s\n", argv[0]);
-		perror(NULL);
-		return -1;
-	}
-	else if (pid > 0) // Parent branch
-	{
+  // Fork
+  pid = fork();
 
-		pid = wait(&status);
 
-		if (pid == -1) // Error. Possible errors: [ECHILD] [EFAULT] or [EAGAIN]
-		{
-			perror("Error when waiting for command execution ");
-			return -1;
-		}
-	}
-	else // Error when calling fork
-	{
-		// Possible errors: [EAGAIN]  or [ENOMEM]
-		perror("Error when calling fork ");
-		return -1;
-	}
+  if (pid == 0) // Child branch
+  {
 
-	return 0;
+    execvp (exec_args[0], &exec_args[0]); // If it returns from the exec then it has been an error
+    printf("Error executing command %s\n", argv[0]);
+    perror(NULL);
+    return -1;
+  }
+  else if (pid > 0) // Parent branch
+  {
+    if (alarm_state == ON) alarm(ALARM_TIME);
+    pid = wait(&status);
+
+    if (pid == -1) // Error. Possible errors: [ECHILD] [EFAULT] or [EAGAIN]
+    {
+      perror("Error when waiting for command execution ");
+      return -1;
+    }
+  }
+  else // Error when calling fork
+  {
+    // Possible errors: [EAGAIN]  or [ENOMEM]
+    perror("Error when calling fork ");
+    return -1;
+  }
+
+  return 0;
 }
 
+void kill_child(int sig) {
+  char *response = NULL;
+  while (response==NULL) {
+    printf("Five minutes have passed since execution. Abort program? Y/N >> ");
+    read_command (response);
+    //If Y kill program
+    if (!strcmp(response,"Y") || !strcmp(response,"y")) { 
+      kill(pid,SIGKILL);
+
+    }
+    //If not Y and not N, try again. N does nothing. 
+    else if (strcmp(response,"N") && strcmp(response,"n")) { 
+      response = NULL;
+    }
+  }
+}
 
 int main(int argc, const char * argv[]) {
 
@@ -409,12 +467,10 @@ int main(int argc, const char * argv[]) {
     print_error(1);
     exit(-1);
   }
-
+  
   /* TODO: cd HOME */
 
-
-  /* TODO: set alarms according to PROFILE */
-
+  signal(SIGALRM,(void (*)(int))kill_child);
 
   while (1) {
     memset(command_str, 0, (MAX_COMMAND_LEN * sizeof(char)));
