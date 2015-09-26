@@ -347,7 +347,19 @@ int recognize_and_exec (char *command_str) {
 int single_execute (char *argv[]) // Executes a program
 {
 	pid_t pid;
-	int status;
+	int status, i;
+	int argc = sizeof(argv) / sizeof(char*); // Getting the number of arguments
+	char *exec_args [argc + 1]; // Adding one for inserting NULL at the end
+
+
+	for (i = 0; i < argc; i++)
+	{
+		exec_args[i] = argv[i];
+	}
+	exec_args[argc] = NULL;
+
+	//printf ("Size before %i, size after %i\n", sizeof(argv) / sizeof(char*), argc);
+
 
 	// Fork
 	pid = fork();
@@ -355,7 +367,7 @@ int single_execute (char *argv[]) // Executes a program
 
 	if (pid == 0) // Child branch
 	{
-		execvp (argv[0], &argv[0]); // If it returns from the exec then it has been an error
+		execvp (exec_args[0], &exec_args[0]); // If it returns from the exec then it has been an error
 		printf("Error executing command %s ", argv[0]);
 		perror(NULL);
 		return -1;
