@@ -40,7 +40,7 @@ struct alias_node {
 /* Global Variables */
 char PATH[MAXLINE], HOME[MAXLINE];
 char *PATH_SEPARATOR = ":";
-struct alias_node alias_list;
+struct alias_node *alias_list;
 
 /* ERRORS */
 
@@ -61,6 +61,8 @@ void print_error (int error_code) {
   case 7: fprintf(stderr, "Error: %s\n", "Invalid number arguments for alias command");
     break;
   case 8: fprintf(stderr, "Error: %s\n", "Alias name contains forbidden characters. Allowed expression: [aA-bB]+.");
+    break;
+  case 9: fprintf(stderr, "Error: %s\n", "Specified file not found");
     break;
   default: break;
   }
@@ -100,13 +102,12 @@ int execute_profile (void) {
  */
 
 int find_alias_by_name (char *original_name, char *dest_string) {
-  printf("Debug: %s\n", "alias by name search");
   // Visit first node of the list
-  struct alias_node *current_node = &alias_list;
+  struct alias_node *current_node = alias_list;
   // Iterate until current node is null = end of list
   while (current_node!=NULL) {
     // If both names are equals copy the alias and return true
-    if (!strcmp(original_name,current_node->original_name)) {
+    if (current_node->original_name!=NULL && !strcmp(original_name,current_node->original_name)) {
       // The function could be used just as a confirmation of existance
       if (dest_string!=NULL) {
         memcpy(dest_string,current_node->alias_name,MAX_COMMAND_LEN);
@@ -120,13 +121,12 @@ int find_alias_by_name (char *original_name, char *dest_string) {
 }
 
 int find_name_by_alias (char *alias_name, char *dest_string) {
-  printf("Debug: %s\n", "name by alias search");
   // Visit first node of the list
-  struct alias_node *current_node = &alias_list;
+  struct alias_node *current_node = alias_list;
   // Iterate until current node is null = end of list
   while (current_node!=NULL) {
     // If both names are equals copy the alias and return true
-    if (!strcmp(alias_name,current_node->alias_name)) {
+    if (current_node->alias_name!=NULL && !strcmp(alias_name,current_node->alias_name)) {
       // The function could be used just as a confirmation of existance
       if (dest_string!=NULL) {
         memcpy(dest_string,current_node->original_name,MAX_COMMAND_LEN);
@@ -154,21 +154,10 @@ int add_alias_node (char *original_name, char *alias_name) {
   pnode->alias_name=a_name;
   /*Update list*/
   pnode->previous=NULL;
-  pnode->next=&alias_list;
-  alias_list.next=NULL;
-  alias_list.previous=pnode;
-  alias_list = *pnode;
-
-  /* Debug */
-  struct alias_node *p = &alias_list;
-  int n_node = 0;
-  while (p!=NULL) {
-    printf("Debug: Alias node %i = %s/%s\n",n_node,p->original_name,p->alias_name);
-    p=p->next;
-    n_node++;
-  }
-
-  /* End Debug */
+  pnode->next=alias_list;
+  alias_list->next=NULL;
+  alias_list->previous=pnode;
+  alias_list = pnode;
   
   return 0;
 }
@@ -187,7 +176,6 @@ int add_alias (char *original_name, char *alias_name) {
   char *folder_name = (char *) malloc(MAXLINE*sizeof(char));
   
   /* Search in current dir first */
-  printf("Debug: %s\n", "looking for original file in current directory");
   d = opendir(".");
   
   if (d) {
@@ -200,11 +188,9 @@ int add_alias (char *original_name, char *alias_name) {
   }
 
   /* Search in PATH */
-   printf("Debug: %s\n", "looking for original file in PATH");
   /* get the first folder */
   folder_name = strtok(PATH, PATH_SEPARATOR);
   d = opendir(folder_name);
-  printf("Debug: %s opened\n", folder_name);
   if (d)
   {
     while ((dir = readdir(d)) != NULL)
@@ -218,19 +204,21 @@ int add_alias (char *original_name, char *alias_name) {
   /* Search in other PATH folders*/
   while(folder_name != NULL) {
     folder_name = strtok(NULL, PATH_SEPARATOR);
-    d = opendir(folder_name);
-    printf("Debug: %s opened\n", folder_name);
-    if (d) {
-      while ((dir = readdir(d)) != NULL) {
-        if (!strcmp(dir->d_name,original_name)) {
-          return add_alias_node (original_name, alias_name);
+    if (folder_name!=NULL) {
+      d = opendir(folder_name);
+      if (d) {
+        while ((dir = readdir(d)) != NULL) {
+          if (!strcmp(dir->d_name,original_name)) {
+            return add_alias_node (original_name, alias_name);
+          }
         }
+        closedir(d);
       }
-      closedir(d);
     }
   }
 
   /*File not found at this point = Error*/
+  print_error(9);
   return -1;
 }
 
@@ -273,36 +261,35 @@ int execute_command (int argc, char ** argv,int command_option) {
     if (argc>2 || argc<=1)
       print_error(7);
     else {
-      char *alias_arg = *(argv+1);
+      char *alias_arg = (char*) malloc(MAXLINE*sizeof(char));
+      strcpy(alias_arg,argv[1]);
 
       /* Identify original name and alias */
-      char *original_name,*alias_name;
-      original_name = strtok(alias_arg, "=");
-      alias_name = strtok(alias_arg, "\0");
-      if ((original_name!=NULL)||(alias_name!=NULL)) {
-        /* Eliminate "" */
-        char *alias_wo_quot = (char*) malloc(MAXLINE*sizeof(char));
-        while (alias_name!=NULL) {
-          if (*alias_name!='\"') {
-            *alias_wo_quot=*alias_name;
-            alias_wo_quot++;
-          }
-          alias_name++;
+      char *original_name = (char *) malloc(MAXLINE*sizeof(char));
+      char *alias_name = (char *) malloc(MAXLINE*sizeof(char));
+      char *token;
+      token = strtok(alias_arg, "=");
+      strcpy(original_name,token);
+      while( token != NULL ) 
+      {
+        token = strtok(NULL, "\"");
+        if (token!=NULL && *token!='\n') {
+          strcpy(alias_name,token);
         }
-        /* Test alias regex */
-        regex_t regex;
-        int reti = regcomp(&regex, "[a-zA-Z]+", 0);
-        if (reti) {
-          fprintf(stderr, "Internal error: Could not compile regex\n");
-          exit(-1);
-        }
-        if ((reti = regexec(&regex, alias_name, 0, NULL, 0))) {
-          print_error(8);
-          return -1;
-        }
-        printf("Debug: original_name: %s alias_name: %s\n", original_name, alias_name);
-        return alias_command(original_name,alias_name);
       }
+
+      /* Test alias regex */
+      regex_t regex;
+      int reti = regcomp(&regex, "[a-zA-Z]*", 0);
+      if (reti) {
+        fprintf(stderr, "Internal error: Could not compile regex\n");
+        exit(-1);
+      }
+      if ((reti = regexec(&regex, alias_name, 0, NULL, 0))>0) {
+        print_error(8);
+        return -1;
+      }
+      return alias_command(original_name,alias_name);
     }
   }
   else if (command_option == IF) {
@@ -353,22 +340,19 @@ int recognize_and_exec (char *command_str) {
     /* Identify args */
     char *arg;
     // First arg
-    arg = strtok(command_str, " ");
+    argv[0] = strtok(command_str, " ");
     *argv = arg;
-    printf("Debug: program name=>%s\n",arg);
+
     // Remaining args
     while(arg != NULL) {
-      argv++;
       arg = strtok(NULL, " ");
       if (arg!=NULL) {
-       *argv=arg;
-        printf("Debug: argv %i=>%s\n",argc,arg);
+        argv[1]=arg;
+        strcpy(*argv, arg);
         argc++;
       }
     }
   }
-  printf("Debug: argc %i\n",argc);
-  printf("Debug: command option %i\n",command_option);
   return execute_command (argc,argv,command_option);
 }
 
@@ -417,8 +401,9 @@ int main(int argc, const char * argv[]) {
 
   /* Initialize alias list */
 
-  alias_list.previous = NULL;
-  alias_list.next = NULL;
+  alias_list = (struct alias_node*) malloc(sizeof(struct alias_node));
+  alias_list->previous = NULL;
+  alias_list->next = NULL;
 
   char *command_str = (char*) malloc(MAX_COMMAND_LEN * sizeof(char));
   if (execute_profile()<0) {
@@ -435,7 +420,7 @@ int main(int argc, const char * argv[]) {
   //char* aux[] = {"ls", "-la",  NULL};
   //single_execute(aux);
   while (1) {
-
+    memset(command_str, 0, (MAX_COMMAND_LEN * sizeof(char)));
     fprintf(stdout,"%s ",">>");
     if (read_command(command_str)<0)
       break;
