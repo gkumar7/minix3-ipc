@@ -64,6 +64,8 @@ void print_error (int error_code) {
     break;
   case 9: fprintf(stderr, "Error: %s\n", "Specified file not found");
     break;
+  case 10: fprintf(stderr, "Error: %s\n", "Invalid HOME.");
+    break;
   default: break;
   }
 }
@@ -71,6 +73,7 @@ void print_error (int error_code) {
 /* FUNCTION HEADERS */
 
 int single_execute (char *argv[], int argc);
+int recognize_and_exec(char *command_str);
 
 /* PROFILE */
 
@@ -285,12 +288,22 @@ int execute_command (int argc, char * argv[], int command_option) {
   }
   else if (command_option == IF) {
     /* TODO: Execute IF with received params. Preprocess them if necessary.*/
+    /* Form: if <command1>; then <command2>; else <command3> fi*/
+    char *condition = strtok(*argv, ";") + 3;
+    char *true_command = strtok(NULL, ";") + 6;
+    char *false_command = strtok(NULL, "") + 6;
+    false_command[strlen(false_command) - 3] = '\0';
+
+    if (recognize_and_exec(condition) == 0)
+      recognize_and_exec(true_command);
+    else
+      recognize_and_exec(false_command);
+
     return 0;
   }
   else if (command_option == EXEC_PROGRAM) {
     /* TODO: Execute EXEC_PROGRAM with received params. Preprocess them if necessary.*/
-	single_execute(argv, argc);
-    return 0;
+    return single_execute(argv, argc);
   }
   else if (command_option == ALARM) {
     /* TODO: Execute ALARM ON/OFF with received params. Preprocess them if necessary.*/
@@ -410,8 +423,11 @@ int main(int argc, const char * argv[]) {
     exit(-1);
   }
 
-  /* TODO: cd HOME */
-
+  /* Go to user specified HOME directory */
+  if (chdir(HOME) != 0){
+    print_error(10);
+    exit(-1);
+  }
 
   /* TODO: set alarms according to PROFILE */
 
