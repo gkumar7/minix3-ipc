@@ -241,18 +241,9 @@ int alias_command (char *original_name, char *alias_name) {
 /* Entry point for all the commands */
 
 int read_command (char *command_str) {
-  int n=0;
-  char *c=(char*) malloc(sizeof(char));
-  char *p=command_str;
-  while ((*c)!='\n') {
-    fgets(c, 2, stdin);
-    if (*c!='\0') {
-      if (n==MAX_COMMAND_LEN) return -1;
-      memcpy(p,c,sizeof(char));
-      n++;
-      p++;
-    }
-  }
+  if ((fgets(command_str, sizeof(command_str), stdin)) == NULL) return -1;
+
+  command_str[strlen(command_str) - 1] = '\0';
   return 0;
 }
 
@@ -357,11 +348,11 @@ int single_execute (char *argv[]) // Executes a program
 {
 	pid_t pid;
 	int status;
-	
+
 	// Fork
 	pid = fork();
-	
-	
+
+
 	if (pid == 0) // Child branch
 	{
 		execvp (argv[0], &argv[0]); // If it returns from the exec then it has been an error
@@ -371,9 +362,9 @@ int single_execute (char *argv[]) // Executes a program
 	}
 	else if (pid > 0) // Parent branch
 	{
-		
+
 		pid = wait(&status);
-	
+
 		if (pid == -1) // Error. Possible errors: [ECHILD] [EFAULT] or [EAGAIN]
 		{
 			perror("Error when waiting for command execution ");
@@ -381,18 +372,18 @@ int single_execute (char *argv[]) // Executes a program
 		}
 		else // Child ended with no errors (Normal way?) Maybe we don't have to do anything at all in this branch
 		{
-			
+
 		}
 	}
 	else // Error when calling fork
-	{ 
+	{
 		// error
-		// Possible errors: [EAGAIN]  or [ENOMEM]  
+		// Possible errors: [EAGAIN]  or [ENOMEM]
 		perror("Error when calling fork ");
-		return -1; 
-               
+		return -1;
+
 	}
-	
+
 	return 0;
 }
 
