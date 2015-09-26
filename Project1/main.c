@@ -10,7 +10,7 @@
 #include <sys/wait.h>
 #include <dirent.h>
 #include <unistd.h>
-#include <regex.h>   
+#include <regex.h>
 
 #define MAX_ARGS       20
 #define MAX_COMMAND_LEN 4096
@@ -96,7 +96,7 @@ int execute_profile (void) {
 
 /* ALIAS */
 
-/*  
+/*
  * If an alias exists then copy it in destString and return true.
  * Otherwise return false.
  */
@@ -158,7 +158,7 @@ int add_alias_node (char *original_name, char *alias_name) {
   alias_list->next=NULL;
   alias_list->previous=pnode;
   alias_list = pnode;
-  
+
   return 0;
 }
 
@@ -166,7 +166,7 @@ int add_alias_node (char *original_name, char *alias_name) {
  * If an executable file called as original_name can be found
  * then, alias is added to the list.
  *
- * Otherwise, print and return error (-1). 
+ * Otherwise, print and return error (-1).
  *
  */
 
@@ -174,10 +174,10 @@ int add_alias (char *original_name, char *alias_name) {
   DIR *d;
   struct dirent *dir;
   char *folder_name = (char *) malloc(MAXLINE*sizeof(char));
-  
+
   /* Search in current dir first */
   d = opendir(".");
-  
+
   if (d) {
     while ((dir = readdir(d)) != NULL) {
       if (!strcmp(dir->d_name,original_name)) {
@@ -238,7 +238,7 @@ int alias_command (char *original_name, char *alias_name) {
 
 int read_command (char *command_str) {
   int n=0;
-  char *c=(char*) malloc(sizeof(char)); 
+  char *c=(char*) malloc(sizeof(char));
   char *p=command_str;
   while ((*c)!='\n') {
     fgets(c, 2, stdin);
@@ -266,7 +266,7 @@ int execute_command (int argc, char * argv[], int command_option) {
       char *token;
       token = strtok(alias_arg, "=");
       strcpy(original_name,token);
-      while( token != NULL ) 
+      while( token != NULL )
       {
         token = strtok(NULL, "\"");
         if (token!=NULL && *token!='\n') {
@@ -336,17 +336,14 @@ int recognize_and_exec (char *command_str) {
     char *arg;
     // First arg
     argv[0] = strtok(command_str, " ");
-    *argv = arg;
+    /* *argv = arg; */
 
     // Remaining args
-    while(arg != NULL) {
-      arg = strtok(NULL, " ");
-      if (arg!=NULL) {
-        argv[1]=arg;
-        strcpy(*argv, arg);
-        argc++;
-      }
+    while ((arg = strtok(NULL, " ")) != NULL) {
+      strcat(*argv, arg);
+      argc++;
     }
+
   }
   return execute_command (argc,argv,command_option);
 }
@@ -357,11 +354,11 @@ int recognize_and_exec (char *command_str) {
   int status;
   char *new_env[] = { NULL }; // This has to be changed
 
-  
+
   // Fork
   pid = fork();
 
-  
+
   if (pid == 0)
   {
     // Child
@@ -373,7 +370,7 @@ int recognize_and_exec (char *command_str) {
   {
     // Parent
     pid = wait(&status);
-  
+
     if (pid == -1) // Error. Possible errors: [ECHILD] [EFAULT] or [EAGAIN]
     {
 
@@ -384,10 +381,10 @@ int recognize_and_exec (char *command_str) {
     }
   }
   else // Error when calling fork
-  { 
+  {
     // error
-    // Possible errors: [EAGAIN]  or [ENOMEM]   
-               
+    // Possible errors: [EAGAIN]  or [ENOMEM]
+
   }
 
 }*/
