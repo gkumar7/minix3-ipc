@@ -70,7 +70,7 @@ void print_error (int error_code) {
 
 /* FUNCTION HEADERS */
 
-int single_execute (char *argv[]);
+int single_execute (char *argv[], int argc);
 
 /* PROFILE */
 
@@ -289,7 +289,7 @@ int execute_command (int argc, char * argv[], int command_option) {
   }
   else if (command_option == EXEC_PROGRAM) {
     /* TODO: Execute EXEC_PROGRAM with received params. Preprocess them if necessary.*/
-	single_execute(argv);
+	single_execute(argv, argc);
     return 0;
   }
   else if (command_option == ALARM) {
@@ -330,25 +330,26 @@ int recognize_and_exec (char *command_str) {
     }
     /* Identify args */
     char *arg;
+
     // First arg
     argv[0] = strtok(command_str, " ");
-    /* *argv = arg; */
 
     // Remaining args
     while ((arg = strtok(NULL, " ")) != NULL) {
-      strcat(*argv, arg);
-      argc++;
+      //strcat(*argv, arg);
+	argv[argc] = arg;
+      	argc++;
     }
 
   }
   return execute_command (argc,argv,command_option);
 }
 
-int single_execute (char *argv[]) // Executes a program
+int single_execute (char *argv[], int argc) // Executes a program
 {
 	pid_t pid;
 	int status, i;
-	int argc = sizeof(argv) / sizeof(char*); // Getting the number of arguments
+	//int argc = sizeof(argv) / sizeof(char*); // Getting the number of arguments
 	char *exec_args [argc + 1]; // Adding one for inserting NULL at the end
 
 
@@ -368,7 +369,7 @@ int single_execute (char *argv[]) // Executes a program
 	if (pid == 0) // Child branch
 	{
 		execvp (exec_args[0], &exec_args[0]); // If it returns from the exec then it has been an error
-		printf("Error executing command %s ", argv[0]);
+		printf("Error executing command %s\n", argv[0]);
 		perror(NULL);
 		return -1;
 	}
@@ -382,18 +383,12 @@ int single_execute (char *argv[]) // Executes a program
 			perror("Error when waiting for command execution ");
 			return -1;
 		}
-		else // Child ended with no errors (Normal way?) Maybe we don't have to do anything at all in this branch
-		{
-
-		}
 	}
 	else // Error when calling fork
 	{
-		// error
 		// Possible errors: [EAGAIN]  or [ENOMEM]
 		perror("Error when calling fork ");
 		return -1;
-
 	}
 
 	return 0;
