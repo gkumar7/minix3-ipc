@@ -405,9 +405,19 @@ int single_execute (char *argv[], int argc) // Executes a program
   int status, i;
   //int argc = sizeof(argv) / sizeof(char*); // Getting the number of arguments
   char *exec_args [argc + 1]; // Adding one for inserting NULL at the end
+  char name_from_alias[50];
 
+	// alias thing
+	if (find_name_by_alias (argv[0], name_from_alias)) // If its an alias, change its value for the original one
+	{
+		exec_args[0] = name_from_alias;
+	}
+	else // If not, just use that argument for the exec
+	{
+		exec_args[0] = argv[0];
+	}
 
-  for (i = 0; i < argc; i++)
+  for (i = 1; i < argc; i++)
   {
     exec_args[i] = argv[i];
   }
