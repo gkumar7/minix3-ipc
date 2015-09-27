@@ -312,10 +312,20 @@ int execute_command (int argc, char * argv[], int command_option) {
   else if (command_option == IF) {
     /* TODO: Execute IF with received params. Preprocess them if necessary.*/
     /* Form: if <command1>; then <command2>; else <command3> fi*/
+    
+    /*strtok(argv[0], " "); // taking 'if' out
+    char *condition = strtok(NULL, ";");
+    strtok(NULL, "t");
+    strtok(NULL, " ");
+    char *true_command = strtok(NULL, ";");
+    strtok(NULL, "e");
+    strtok(NULL, " ");
+    char *false_command = strtok(NULL, "fi");*/
+	
     char *condition = strtok(*argv, ";") + 3;
     char *true_command = strtok(NULL, ";") + 6;
-    char *false_command = strtok(NULL, "") + 6;
-    false_command[strlen(false_command) - 3] = '\0';
+    char *false_command = strtok(NULL, "fi") + 6;
+    //false_command[strlen(false_command) - 3] = '\0';
 
     if (recognize_and_exec(condition) == 0)
       recognize_and_exec(true_command);
@@ -356,7 +366,7 @@ int recognize_and_exec (char *command_str) {
    * TODO: -> determine type of command (program, if-else sentence, alarm set...)
    *     -> exec the command
    */
-
+//str = (char *) malloc(15);
   int argc=1;
   //char **argv = (char **) malloc(sizeof(char *) * MAX_ARGS);
   char * argv[MAX_ARGS];
@@ -365,7 +375,9 @@ int recognize_and_exec (char *command_str) {
   //Case IF command (special case: argument is a command itself)
   if ((strlen(command_str)>=3) && (!strncmp(command_str,"if ",3))) {
     /* TODO: prepare args to call IF */
+    argv[0] = (char *) malloc (MAXLINE);
     strncpy(argv[0], command_str, strlen(command_str));
+    //snprintf(argv[0], "%s", command_str);
     command_option=IF;
   }
   else
