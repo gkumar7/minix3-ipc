@@ -12,6 +12,7 @@
 #include <unistd.h>
 #include <regex.h>
 #include <signal.h>
+#include <errno.h>
 
 #define MAX_ARGS       20
 #define MAX_COMMAND_LEN 4096
@@ -462,7 +463,14 @@ int single_execute (char *argv[], int argc) // Executes a program
     //sigprocmask( SIG_UNBLOCK, &old_set, &new_set); //Unblock signal in parent
 		signal(SIGINT, SIG_DFL); //Unblock signal in parent
     if (alarm_state == ON) alarm(ALARM_TIME);
-    pid = wait(&status);
+
+    // Ignore any EINTR errors
+    do
+      {
+	pid = wait(&status);
+      }
+    while (pid == -1 && errno == EINTR);
+
     if (alarm_state == ON) alarm(0);
 		//sigprocmask( SIG_BLOCK, &new_set, &old_set); //Block signal in main process
 
@@ -490,6 +498,10 @@ void signal_handler( int sig ) {
 		if (!strcmp(response,"Y")) {
 			kill(pid,SIGTERM);
 		}
+		else {
+		  // If the user does not response with a yes, create new alarm
+		  alarm(ALARM_TIME);
+		}
 }
 
 int main(int argc, const char * argv[]) {
@@ -514,18 +526,18 @@ int main(int argc, const char * argv[]) {
   }
 
 	/* Signals configuration */
-	
+
 	/*struct sigaction sact;
-	
+
 	sigemptyset( &sact.sa_mask ); //initialize set
-  sact.sa_flags = 0; 
+  sact.sa_flags = 0;
   sact.sa_handler = signal_handler; //set handler
   sigaction( SIGALRM, &sact, NULL ); //associate action to SIGALRM
 
 	sigemptyset( &new_set ); //initialize new set
   sigaddset( &new_set, SIGALRM ); //add SIGALRM to the new set
   sigprocmask( SIG_BLOCK, &new_set, &old_set); //block new set and store old set*/
-	signal(SIGALRM, &signal_handler);
+  signal(SIGALRM, &signal_handler);
 
   while (1) {
     memset(command_str, 0, (MAX_COMMAND_LEN * sizeof(char)));
