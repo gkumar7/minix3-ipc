@@ -159,7 +159,7 @@ int find_name_by_alias (char *alias_name, char *dest_string) {
     if (current_node->alias_name!=NULL && !strcmp(alias_name,current_node->alias_name)) {
       // The function could be used just as a confirmation of existance
       if (dest_string!=NULL) {
-        memcpy(dest_string,current_node->original_name,MAX_COMMAND_LEN);
+        memcpy(dest_string,current_node->original_name,MAXLINE);
       }
       return TRUE;
     }
@@ -286,12 +286,12 @@ int execute_command (int argc, char * argv[], int command_option) {
       char *alias_name = (char *) malloc(MAXLINE*sizeof(char));
       char *token;
       token = strtok(alias_arg, "=");
-      strcpy(original_name,token);
+      strcpy(alias_name,token);
       while( token != NULL )
       {
         token = strtok(NULL, "\"");
         if (token!=NULL && *token!='\n') {
-          strcpy(alias_name,token);
+          strcpy(original_name,token);
         }
       }
 
@@ -480,10 +480,8 @@ int main(int argc, const char * argv[]) {
     exit(-1);
   }
 
-  printf("st: %i\n",alarm_state);
-
   /* Go to user specified HOME directory */
-  if (chdir(HOME) != 0){
+  if (chdir(HOME)!=0){
     print_error(10);
     exit(-1);
   }
