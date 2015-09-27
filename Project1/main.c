@@ -103,13 +103,11 @@ int execute_profile (void) {
       memcpy(HOME, rest, strlen(rest));
     }
     else if (strcmp(var_type, "ALARM") == 0) {
-      char *alarm_arg;
-      memcpy(alarm_arg, rest, strlen(rest));
-      if (rest[strlen(rest)-1]=='\n') strtok(alarm_arg,"\n");
-      if (strcmp(alarm_arg, "ON") == 0) {
+      if (rest[strlen(rest)-1]=='\n') strtok(rest,"\n");   
+      if (strcmp(rest, "ON") == 0) {
         alarm_state=ON;
       }
-      else if (strcmp(alarm_arg, "OFF") == 0) {
+      else if (strcmp(rest, "OFF") == 0) {
         alarm_state=OFF;
       } else {
         fclose(profile_file);
@@ -405,7 +403,7 @@ int single_execute (char *argv[], int argc) // Executes a program
   int status, i;
   //int argc = sizeof(argv) / sizeof(char*); // Getting the number of arguments
   char *exec_args [argc + 1]; // Adding one for inserting NULL at the end
-  char name_from_alias[50];
+  char name_from_alias[MAXLINE];
 
   // alias thing
   if (find_name_by_alias (argv[0], name_from_alias)) // If its an alias, change its value for the original one
@@ -479,6 +477,8 @@ int main(int argc, const char * argv[]) {
     print_error(1);
     exit(-1);
   }
+
+  printf("st: %i\n",alarm_state);
 
   /* Go to user specified HOME directory */
   if (chdir(HOME) != 0){
