@@ -103,7 +103,7 @@ int execute_profile (void) {
       memcpy(HOME, rest, strlen(rest));
     }
     else if (strcmp(var_type, "ALARM") == 0) {
-      if (rest[strlen(rest)-1]=='\n') strtok(rest,"\n");   
+      if (rest[strlen(rest)-1]=='\n') strtok(rest,"\n");
       if (strcmp(rest, "ON") == 0) {
       alarm_state=ON;
       }
@@ -368,7 +368,7 @@ int recognize_and_exec (char *command_str) {
     strncpy(argv[0], command_str, strlen(command_str));
     command_option=IF;
   }
-  else 
+  else
   {
     //Case ALIAS command
     if ((strlen(command_str)>=6) && (!strncmp(command_str,"alias ",6))) {
@@ -462,7 +462,7 @@ int single_execute (char *argv[], int argc) // Executes a program
 
 void kill_child(int sig) {
   //TODO: show confirmation alert.
-  kill(pid,SIGKILL);
+  //kill(pid,SIGKILL);
 }
 
 int main(int argc, const char * argv[]) {
@@ -489,7 +489,7 @@ int main(int argc, const char * argv[]) {
   }
 
   /* TODO: set alarms according to PROFILE */
-  signal(SIGALRM,(void (*)(int))kill_child);
+  //signal(SIGALRM,(void (*)(int))kill_child);
 
 
   while (1) {

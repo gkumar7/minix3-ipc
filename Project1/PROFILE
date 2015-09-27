@@ -1,6 +1,3 @@
 PATH=/usr/bin:/bin
 
-HOME=/home
-
-ALARM=ON
-
+HOME=/root
