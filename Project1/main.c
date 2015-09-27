@@ -50,6 +50,7 @@ char *PATH_SEPARATOR = ":";
 struct alias_node *alias_list;
 pid_t pid;
 int alarm_state;
+sigset_t new_set, old_set;
 
 /* ERRORS */
 
@@ -444,26 +445,26 @@ int single_execute (char *argv[], int argc) // Executes a program
 
   //printf ("Size before %i, size after %i\n", sizeof(argv) / sizeof(char*), argc);
 
-
+	signal(SIGINT, SIG_IGN); //ignore SIGINT
   // Fork
   pid = fork();
 
 
   if (pid == 0) // Child branch
   {
-
-    signal(SIGALRM, SIG_IGN);
     execvp (exec_args[0], &exec_args[0]); // If it returns from the exec then it has been an error
     printf("Error executing command %s\n", argv[0]);
     perror(NULL);
     return -1;
   }
-  else if (pid > 0) // Parent branch
+  else if (pid != 0) // Parent branch
   {
-    signal(SIGALRM, kill_child);
+    //sigprocmask( SIG_UNBLOCK, &old_set, &new_set); //Unblock signal in parent
+		signal(SIGINT, SIG_DFL); //Unblock signal in parent
     if (alarm_state == ON) alarm(ALARM_TIME);
     pid = wait(&status);
     if (alarm_state == ON) alarm(0);
+		//sigprocmask( SIG_BLOCK, &new_set, &old_set); //Block signal in main process
 
     if (pid == -1) // Error. Possible errors: [ECHILD] [EFAULT] or [EAGAIN]
     {
@@ -479,6 +480,16 @@ int single_execute (char *argv[], int argc) // Executes a program
   }
 
   return 0;
+}
+
+void signal_handler( int sig ) {
+		char *response = (char*) malloc(MAX_COMMAND_LEN * sizeof(char));
+    printf( "Kill process? [Y/N]: ");
+		read_command(response);
+		strtok(response,"/n");
+		if (!strcmp(response,"Y")) {
+			kill(pid,SIGTERM);
+		}
 }
 
 int main(int argc, const char * argv[]) {
@@ -501,6 +512,20 @@ int main(int argc, const char * argv[]) {
     print_error(10);
     exit(-1);
   }
+
+	/* Signals configuration */
+	
+	/*struct sigaction sact;
+	
+	sigemptyset( &sact.sa_mask ); //initialize set
+  sact.sa_flags = 0; 
+  sact.sa_handler = signal_handler; //set handler
+  sigaction( SIGALRM, &sact, NULL ); //associate action to SIGALRM
+
+	sigemptyset( &new_set ); //initialize new set
+  sigaddset( &new_set, SIGALRM ); //add SIGALRM to the new set
+  sigprocmask( SIG_BLOCK, &new_set, &old_set); //block new set and store old set*/
+	signal(SIGALRM, &signal_handler);
 
   while (1) {
     memset(command_str, 0, (MAX_COMMAND_LEN * sizeof(char)));
