@@ -11,6 +11,7 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <regex.h>
+#include <signal.h>
 
 #define MAX_ARGS       20
 #define MAX_COMMAND_LEN 4096
@@ -312,7 +313,7 @@ int execute_command (int argc, char * argv[], int command_option) {
   else if (command_option == IF) {
     /* TODO: Execute IF with received params. Preprocess them if necessary.*/
     /* Form: if <command1>; then <command2>; else <command3> fi*/
-    
+
     /*strtok(argv[0], " "); // taking 'if' out
     char *condition = strtok(NULL, ";");
     strtok(NULL, "t");
@@ -321,7 +322,7 @@ int execute_command (int argc, char * argv[], int command_option) {
     strtok(NULL, "e");
     strtok(NULL, " ");
     char *false_command = strtok(NULL, "fi");*/
-	
+
     char *condition = strtok(*argv, ";") + 3;
     char *true_command = strtok(NULL, ";") + 6;
     char *false_command = strtok(NULL, "fi") + 6;
@@ -411,6 +412,12 @@ int recognize_and_exec (char *command_str) {
   return execute_command (argc,argv,command_option);
 }
 
+void kill_child(int sig) {
+  //TODO: show confirmation alert.
+  printf("test\n");
+  //kill(pid,SIGKILL);
+}
+
 int single_execute (char *argv[], int argc) // Executes a program
 {
   //pid_t pid;
@@ -445,6 +452,7 @@ int single_execute (char *argv[], int argc) // Executes a program
   if (pid == 0) // Child branch
   {
 
+    signal(SIGALRM, SIG_IGN);
     execvp (exec_args[0], &exec_args[0]); // If it returns from the exec then it has been an error
     printf("Error executing command %s\n", argv[0]);
     perror(NULL);
@@ -452,6 +460,7 @@ int single_execute (char *argv[], int argc) // Executes a program
   }
   else if (pid > 0) // Parent branch
   {
+    signal(SIGALRM, kill_child);
     if (alarm_state == ON) alarm(ALARM_TIME);
     pid = wait(&status);
     if (alarm_state == ON) alarm(0);
@@ -470,11 +479,6 @@ int single_execute (char *argv[], int argc) // Executes a program
   }
 
   return 0;
-}
-
-void kill_child(int sig) {
-  //TODO: show confirmation alert.
-  //kill(pid,SIGKILL);
 }
 
 int main(int argc, const char * argv[]) {
@@ -497,10 +501,6 @@ int main(int argc, const char * argv[]) {
     print_error(10);
     exit(-1);
   }
-
-  /* TODO: set alarms according to PROFILE */
-  //signal(SIGALRM,(void (*)(int))kill_child);
-
 
   while (1) {
     memset(command_str, 0, (MAX_COMMAND_LEN * sizeof(char)));
