@@ -105,7 +105,7 @@ int execute_profile (void) {
     else if (strcmp(var_type, "ALARM") == 0) {
       if (rest[strlen(rest)-1]=='\n') strtok(rest,"\n");   
       if (strcmp(rest, "ON") == 0) {
-        alarm_state=ON;
+      alarm_state=ON;
       }
       else if (strcmp(rest, "OFF") == 0) {
         alarm_state=OFF;
