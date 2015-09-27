@@ -365,9 +365,11 @@ int recognize_and_exec (char *command_str) {
   //Case IF command (special case: argument is a command itself)
   if ((strlen(command_str)>=3) && (!strncmp(command_str,"if ",3))) {
     /* TODO: prepare args to call IF */
+    strncpy(argv[0], command_str, strlen(command_str));
     command_option=IF;
   }
-  else {
+  else 
+  {
     //Case ALIAS command
     if ((strlen(command_str)>=6) && (!strncmp(command_str,"alias ",6))) {
       command_option=ALIAS;
