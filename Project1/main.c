@@ -1,7 +1,8 @@
-//
-//  main.c
-//  Project1
-//
+/*
+   Project 1
+   cs551
+   authors: Sergio Gil, Ernesto Garcia, Geet Kumar
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -314,22 +315,12 @@ int execute_command (int argc, char * argv[], int command_option) {
     }
   }
   else if (command_option == IF) {
-    /* TODO: Execute IF with received params. Preprocess them if necessary.*/
+    /* Execute IF with received params. Preprocess them if necessary.*/
     /* Form: if <command1>; then <command2>; else <command3> fi*/
-
-    /*strtok(argv[0], " "); // taking 'if' out
-    char *condition = strtok(NULL, ";");
-    strtok(NULL, "t");
-    strtok(NULL, " ");
-    char *true_command = strtok(NULL, ";");
-    strtok(NULL, "e");
-    strtok(NULL, " ");
-    char *false_command = strtok(NULL, "fi");*/
 
     char *condition = strtok(*argv, ";") + 3;
     char *true_command = strtok(NULL, ";") + 6;
     char *false_command = strtok(NULL, "fi") + 6;
-    //false_command[strlen(false_command) - 3] = '\0';
 
     if (recognize_and_exec(condition) == 0)
       recognize_and_exec(true_command);
@@ -339,7 +330,7 @@ int execute_command (int argc, char * argv[], int command_option) {
     return 0;
   }
   else if (command_option == EXEC_PROGRAM) {
-    /* TODO: Execute EXEC_PROGRAM with received params. Preprocess them if necessary.*/
+    /* Execute EXEC_PROGRAM with received params. Preprocess them if necessary.*/
     return single_execute(argv, argc);
   }
   else if (command_option == ALARM) {
@@ -367,21 +358,18 @@ int execute_command (int argc, char * argv[], int command_option) {
 
 int recognize_and_exec (char *command_str) {
   /*
-   * TODO: -> determine type of command (program, if-else sentence, alarm set...)
+   * determine type of command (program, if-else sentence, alarm set...)
    *     -> exec the command
    */
-//str = (char *) malloc(15);
   int argc=1;
-  //char **argv = (char **) malloc(sizeof(char *) * MAX_ARGS);
   char * argv[MAX_ARGS];
   int command_option;
 
   //Case IF command (special case: argument is a command itself)
   if ((strlen(command_str)>=3) && (!strncmp(command_str,"if ",3))) {
-    /* TODO: prepare args to call IF */
+    /* prepare args to call IF */
     argv[0] = (char *) malloc (MAXLINE);
     strncpy(argv[0], command_str, strlen(command_str));
-    //snprintf(argv[0], "%s", command_str);
     command_option=IF;
   }
   else
@@ -392,10 +380,10 @@ int recognize_and_exec (char *command_str) {
     }
     //Case ALARM ON/OFF
     else if ((strlen(command_str)>=6) && (!strncmp(command_str,"alarm ",6))) {
-       /* TODO: prepare args to call ALARM ON/OFF */
+       /* prepare args to call ALARM ON/OFF */
       command_option=ALARM;
     } else {
-       /* TODO: prepare args to call EXEC_PROGRAM */
+       /* prepare args to call EXEC_PROGRAM */
       command_option=EXEC_PROGRAM;
     }
     /* Identify args */
@@ -406,7 +394,6 @@ int recognize_and_exec (char *command_str) {
 
     // Remaining args
     while ((arg = strtok(NULL, " ")) != NULL) {
-      //strcat(*argv, arg);
   argv[argc] = arg;
         argc++;
     }
@@ -415,21 +402,12 @@ int recognize_and_exec (char *command_str) {
   return execute_command (argc,argv,command_option);
 }
 
-void kill_child(int sig) {
-  //TODO: show confirmation alert.
-  printf("test\n");
-  //kill(pid,SIGKILL);
-}
-
 int single_execute (char *argv[], int argc) // Executes a program
 {
-  //pid_t pid;
   int status, i;
-  //int argc = sizeof(argv) / sizeof(char*); // Getting the number of arguments
   char *exec_args [argc + 1]; // Adding one for inserting NULL at the end
   char name_from_alias[MAXLINE];
 
-  // alias thing
   if (find_name_by_alias (argv[0], name_from_alias)) // If its an alias, change its value for the original one
   {
     exec_args[0] = name_from_alias;
@@ -445,7 +423,6 @@ int single_execute (char *argv[], int argc) // Executes a program
   }
   exec_args[argc] = NULL;
 
-  //printf ("Size before %i, size after %i\n", sizeof(argv) / sizeof(char*), argc);
   // Fork
   pid = fork();
 
@@ -463,10 +440,9 @@ int single_execute (char *argv[], int argc) // Executes a program
   else if (pid != 0) // Parent branch
   {
     pid_of_child = pid;
-    //sigprocmask( SIG_UNBLOCK, &old_set, &new_set); //Unblock signal in parent
 
     if (alarm_state == ON) alarm(ALARM_TIME);
-    // Ignore any EINTR errors
+    // Ignore any EINTR errors (thrown in MINIX)
     do
       {
 	pid = wait(&status);
@@ -474,7 +450,6 @@ int single_execute (char *argv[], int argc) // Executes a program
     while (pid == -1 && errno == EINTR);
 
     if (alarm_state == ON) alarm(0);
-		//sigprocmask( SIG_BLOCK, &new_set, &old_set); //Block signal in main process
 
     if (pid == -1) // Error. Possible errors: [ECHILD] [EFAULT] or [EAGAIN]
     {
@@ -527,18 +502,7 @@ int main(int argc, const char * argv[]) {
     exit(-1);
   }
 
-	/* Signals configuration */
-
-	/*struct sigaction sact;
-
-	sigemptyset( &sact.sa_mask ); //initialize set
-  sact.sa_flags = 0;
-  sact.sa_handler = signal_handler; //set handler
-  sigaction( SIGALRM, &sact, NULL ); //associate action to SIGALRM
-
-	sigemptyset( &new_set ); //initialize new set
-  sigaddset( &new_set, SIGALRM ); //add SIGALRM to the new set
-  sigprocmask( SIG_BLOCK, &new_set, &old_set); //block new set and store old set*/
+  // Set handler for SIGALRM
   signal(SIGALRM, &signal_handler);
 
   while (1) {
