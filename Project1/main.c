@@ -32,7 +32,7 @@
 
 #define ON 1
 #define OFF 0
-#define ALARM_TIME 1
+#define ALARM_TIME 5
 
 /*
  * Struct definitions
@@ -445,8 +445,6 @@ int single_execute (char *argv[], int argc) // Executes a program
   exec_args[argc] = NULL;
 
   //printf ("Size before %i, size after %i\n", sizeof(argv) / sizeof(char*), argc);
-
-	signal(SIGINT, SIG_IGN); //ignore SIGINT
   // Fork
   pid = fork();
 
@@ -456,14 +454,16 @@ int single_execute (char *argv[], int argc) // Executes a program
     execvp (exec_args[0], &exec_args[0]); // If it returns from the exec then it has been an error
     printf("Error executing command %s\n", argv[0]);
     perror(NULL);
+
+    // Exit the child
+    _exit(-1);
     return -1;
   }
   else if (pid != 0) // Parent branch
   {
     //sigprocmask( SIG_UNBLOCK, &old_set, &new_set); //Unblock signal in parent
-		signal(SIGINT, SIG_DFL); //Unblock signal in parent
-    if (alarm_state == ON) alarm(ALARM_TIME);
 
+    if (alarm_state == ON) alarm(ALARM_TIME);
     // Ignore any EINTR errors
     do
       {
@@ -491,17 +491,17 @@ int single_execute (char *argv[], int argc) // Executes a program
 }
 
 void signal_handler( int sig ) {
-		char *response = (char*) malloc(MAX_COMMAND_LEN * sizeof(char));
-    printf( "Kill process? [Y/N]: ");
-		read_command(response);
-		strtok(response,"/n");
-		if (!strcmp(response,"Y")) {
-			kill(pid,SIGTERM);
-		}
-		else {
-		  // If the user does not response with a yes, create new alarm
-		  alarm(ALARM_TIME);
-		}
+  char *response = (char*) malloc(MAX_COMMAND_LEN * sizeof(char));
+  printf( "Kill process? [Y/N]: ");
+  read_command(response);
+  strtok(response,"/n");
+  if (!strcmp(response,"Y")) {
+    kill(pid,SIGTERM);
+  }
+  else {
+    // If the user does not response with a yes, create new alarm
+    alarm(ALARM_TIME);
+  }
 }
 
 int main(int argc, const char * argv[]) {
