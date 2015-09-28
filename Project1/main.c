@@ -497,7 +497,7 @@ void signal_handler( int sig ) {
   printf( "Kill process? [Y/N]: ");
   read_command(response);
   strtok(response,"/n");
-  if (!strcmp(response,"Y")) {
+  if (!strcmp(response,"Y") || !strcmp(response, "y")) {
     kill(pid_of_child,SIGTERM);
   }
   else {
