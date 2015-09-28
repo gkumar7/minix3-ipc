@@ -209,13 +209,15 @@ int add_alias (char *original_name, char *alias_name) {
   DIR *d;
   struct dirent *dir;
   char *folder_name = (char *) malloc(MAXLINE*sizeof(char));
-
+	char *path_cpy = (char *) malloc(MAXLINE*sizeof(char));
+	memcpy(path_cpy,PATH,MAXLINE*sizeof(char));
   /* Search in current dir first */
   d = opendir(".");
 
   if (d) {
     while ((dir = readdir(d)) != NULL) {
       if (!strcmp(dir->d_name,original_name)) {
+				closedir(d);
         return add_alias_node (original_name, alias_name);
       }
     }
@@ -224,13 +226,14 @@ int add_alias (char *original_name, char *alias_name) {
 
   /* Search in PATH */
   /* get the first folder */
-  folder_name = strtok(PATH, PATH_SEPARATOR);
+  folder_name = strtok(path_cpy, PATH_SEPARATOR);
   d = opendir(folder_name);
   if (d)
   {
     while ((dir = readdir(d)) != NULL)
     {
       if (!strcmp(dir->d_name,original_name)) {
+				closedir(d);
         return add_alias_node (original_name, alias_name);
       }
     }
@@ -244,6 +247,7 @@ int add_alias (char *original_name, char *alias_name) {
       if (d) {
         while ((dir = readdir(d)) != NULL) {
           if (!strcmp(dir->d_name,original_name)) {
+						closedir(d);
             return add_alias_node (original_name, alias_name);
           }
         }
