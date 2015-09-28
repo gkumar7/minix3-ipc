@@ -50,6 +50,7 @@ char PATH[MAXLINE], HOME[MAXLINE];
 char *PATH_SEPARATOR = ":";
 struct alias_node *alias_list;
 pid_t pid;
+pid_t pid_of_child;
 int alarm_state;
 sigset_t new_set, old_set;
 
@@ -461,6 +462,7 @@ int single_execute (char *argv[], int argc) // Executes a program
   }
   else if (pid != 0) // Parent branch
   {
+    pid_of_child = pid;
     //sigprocmask( SIG_UNBLOCK, &old_set, &new_set); //Unblock signal in parent
 
     if (alarm_state == ON) alarm(ALARM_TIME);
@@ -496,7 +498,7 @@ void signal_handler( int sig ) {
   read_command(response);
   strtok(response,"/n");
   if (!strcmp(response,"Y")) {
-    kill(pid,SIGTERM);
+    kill(pid_of_child,SIGTERM);
   }
   else {
     // If the user does not response with a yes, create new alarm
