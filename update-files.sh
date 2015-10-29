@@ -11,3 +11,4 @@ done
 # Copy callnr.h to include/
 
 cp callnr.h /usr/src/minix/include/minix
+cp mailboxlib.h /usr/src/minix/include/minix
