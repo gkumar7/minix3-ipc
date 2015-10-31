@@ -7,9 +7,17 @@ static mailbox_t *mailbox;
 
 int create_mailbox(){
 	mailbox = malloc(sizeof(mailbox_t));
-	mailbox->messages = malloc(sizeof(message_t));
-	mailbox->last_msg = malloc(sizeof(message_t));
+	mailbox->head = malloc(sizeof(message_t));
+
+	// Sentinel
+	message_t *head = malloc(sizeof(message_t));
+	head->message = "HEAD";
+	head->prev = head;
+	head->next = head;
+
+	mailbox->head = head;
 	mailbox->number_of_messages = 0;
+
 	return OK;
 }
 
@@ -28,24 +36,19 @@ int add_to_mailbox(char *message, int *recipients, int recipients_num)
 		create_mailbox();
 	}
 
-	message_t *new_message = malloc(sizeof(message_t));
-	new_message->recipients_num = recipients_num;
-	new_message->recipients = recipients;
-	new_message->message = message;
-	new_message->next = NULL;
-
 	if (mailbox->number_of_messages < MAX_MESSAGE_COUNT)
 	{
-		if (!(mailbox->messages->message))
-		{
-			mailbox->messages = new_message;
-			mailbox->last_msg = new_message;
-		}
-		else
-		{
-			mailbox->last_msg->next = new_message;
-			mailbox->last_msg = new_message;
-		}
+	  	message_t *new_message = malloc(sizeof(message_t));
+		new_message->recipients_num = recipients_num;
+		new_message->recipients = recipients;
+		new_message->message = message;
+
+		new_message->next = mailbox->head;
+		new_message->prev = mailbox->head->prev;
+
+		mailbox->head->prev->next = new_message;
+		mailbox->head->prev = new_message;
+
 		mailbox->number_of_messages += 1;
 	}
 	else

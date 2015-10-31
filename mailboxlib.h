@@ -26,19 +26,19 @@ typedef struct message_struct {
   int recipients_num;
   int *recipients;
   char *message;
+  struct message_struct *prev;
   struct message_struct *next;
 } message_t;
 
 /* Mailbox
  * number_of_messages - current number of messages in the mailbox (limit is 16)
- * messages - pointer to head of message linked list
+ * head - pointer to head of message linked list
  * last_msg - pointer to last message of the linked list
  */
 
 typedef struct {
   int number_of_messages;
-  message_t *messages;
-  message_t *last_msg;
+  message_t *head;
 } mailbox_t;
 
 
