@@ -2,12 +2,17 @@
  * Define prototypes for message and mailbox structs *
  * ================================================= */
 
+#ifndef _MAILBOXLIB_H_
+#define _MAILBOXLIB_H_
+
 #include <stdlib.h>
 #include <stdio.h>
 
 #define MAX_MESSAGE_COUNT 16
 #define OK 0
 #define ERROR -1
+
+int create_mailbox();
 
 /* Message LinkedList
  * recipients_num - total number of recipients (will be decremented each time
@@ -51,4 +56,5 @@ int recieve_message()
 
 	return 0;
 }
-}
+
+#endif

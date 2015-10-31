@@ -1,7 +1,7 @@
 /* File mailbox.c */
 /* Define system calls to the mailbox */
 
-#include "mailboxlib.h"
+#include <mailboxlib.h>
 
 
 static mailbox_t *mailbox;
@@ -49,24 +49,4 @@ int add_to_mailbox(char *message, int *recipients, int recipients_num){
   }
 
   return OK;
-}
-
-/* Send system call */
-int do_send()
-{
-	// No arguments. Message should be stored in the m_in message struct
-
-	// Step 1: Retrieve the message from the process global struct m1
-
-	// Step 2: Store the message in the queue
-
-}
-
-
-int do_receive()
-{
-	// Get the message from the mailbox
-
-	// Store it in the global struct m
-
 }
