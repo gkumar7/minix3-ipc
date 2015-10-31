@@ -7,6 +7,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <ipc.h>
 
 #define MAX_MESSAGE_COUNT 16
 #define OK 0
@@ -42,11 +43,26 @@ typedef struct {
 } mailbox_t;
 
 
-int send_message()
+int send_message(char *messageData, int *recipients)
 {
+	message m;
+	int arraySize = sizeof(recipients);
+	int i;
+	char recipientsString[128];  // 6 [5 from pid + 1 from separator] * 16, will be always lower than 128
 
 
-	return 0;
+	for (i = 0; i < arraySize; i ++)
+	{
+		snprintf(recipientsString, 128, "%d", recipients[i]);
+		strncat(recipientsString, " ", 1);
+	}
+
+	printf("Maping message %s to pids %s\n", messageData, recipientsString);
+
+	m.m1_p1 = messageData;
+	m.m1_p2 = recipientsString;
+
+	return(_syscall(PM_DEPOSIT, 48, &m));
 }
 
 
