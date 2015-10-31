@@ -22,6 +22,7 @@ int create_mailbox(){
  */
 int add_to_mailbox(char *message, int *recipients, int recipients_num)
 {
+	//If the mailbox doesn't exist, we create it first
 	if (!mailbox)
 	{
 		create_mailbox();
@@ -52,6 +53,13 @@ int add_to_mailbox(char *message, int *recipients, int recipients_num)
 		printf("Error: mailbox is full\n");
 		return ERROR;
 	}
+
+	return OK;
+}
+
+int get_from_mailbox(char *message, int recipient)
+{
+
 
 	return OK;
 }
