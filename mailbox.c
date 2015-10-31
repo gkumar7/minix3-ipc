@@ -28,8 +28,9 @@ int create_mailbox(){
  *
  * TODO: Remove parameters and use a message type
  */
-int add_to_mailbox(char *message, int *recipients, int recipients_num)
+int add_to_mailbox(char *message, int *recipients)
 {
+
 	//If the mailbox doesn't exist, we create it first
 	if (!mailbox)
 	{
