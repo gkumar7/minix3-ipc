@@ -62,6 +62,7 @@ int do_send()
 
 }
 
+
 int do_receive()
 {
 	// Get the message from the mailbox
