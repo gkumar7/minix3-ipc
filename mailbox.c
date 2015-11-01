@@ -53,7 +53,7 @@ int add_to_mailbox()
 	stringRecipients = m_in.m1_p2;
     
     // If message size > MAX_MESSAGE_LEN return error
-    messageLen = m_in.m1_p3;
+    messageLen = m_in.m1_i1;
     
     if (messageLen > MAX_MESSAGE_LEN) {
         printf("Error: received message size exceds %i chars\n", MAX_MESSAGE_LEN);

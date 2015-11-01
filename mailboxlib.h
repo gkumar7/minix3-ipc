@@ -80,7 +80,7 @@ int send_message(char *messageData, size_t messageLen,int *recipients)
 
 	m.m1_p1 = messageData;
 	m.m1_p2 = recipientsString;
-    m.m1_p3 = (int) messageLen;
+    m.m1_i1 = (int) messageLen;
 
 	return(_syscall(PM_DEPOSIT, 48, &m));
 }
