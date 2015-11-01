@@ -16,3 +16,7 @@ cp pm_Makefile /usr/src/minix/servers/pm/Makefile
 
 cp callnr.h /usr/src/minix/include/minix
 cp mailboxlib.h /usr/src/minix/include
+
+# Build
+cd /usr/src/releasetools
+make hdboot
