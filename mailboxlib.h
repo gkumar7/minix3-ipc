@@ -16,6 +16,18 @@
 
 int create_mailbox();
 
+/* PID LinkedList
+ * pid: PID of a recipient process
+ * prev: previous recipient process
+ * next: following recipient process
+ */
+
+typedef struct pid_node {
+    struct pid_list *prev;
+    int pid;
+    struct pid_list *next;
+} pid_node_t;
+
 /* Message LinkedList
  * recipients - recipients of this message
  * message - the message value
@@ -23,11 +35,15 @@ int create_mailbox();
  */
 
 typedef struct message_struct {
-  int *recipients;
-  char *message;
-  struct message_struct *prev;
-  struct message_struct *next;
+    //int recipients_num;
+    //int *recipients;
+    pid_node_t *recipients;
+    char *message;
+    struct message_struct *prev;
+    struct message_struct *next;
 } message_t;
+
+int init_msg_pid_list(message_t *m);
 
 /* Mailbox
  * number_of_messages - current number of messages in the mailbox (limit is 16)

@@ -30,6 +30,13 @@ int create_mailbox(){
 	return OK;
 }
 
+int init_msg_pid_list(message_t *m) {
+    m->recipients = malloc(sizeof(pid_node_t));
+    m->recipients->prev = recipients;
+    m->recipients->pid = NULL;
+    m->recipients->next = recipients;
+}
+
 /* Creates mailbox if there is none
  * Add message to mailbox (if mailbox is not full)
  * Returns OK if message was successfully added
@@ -54,9 +61,27 @@ int add_to_mailbox()
 
 	if (mailbox->number_of_messages < MAX_MESSAGE_COUNT)
 	{
-	  	message_t *new_message = malloc(sizeof(message_t));
-		new_message->recipients = recipients;
-		new_message->message = message;
+        message_t *new_message = malloc(sizeof(message_t));
+        new_message->recipients_num = recipients_num;
+        //new_message->recipients = recipients;
+        new_message->message = message;
+        init_msg_pid_list(new_message);
+        
+        int *rec_p = recipients;
+        
+        while (rec_p!=NULL) {
+            pid_node_t *new_recipient = malloc(sizeof(pid_node_t));
+            
+            new_recipient->pid=*rec_p;
+            
+            new_recipient->next = new_message->recipients;
+            new_recipient->prev = new_message->recipients->prev;
+            
+            new_message->recipients->next = new_recipient;
+            new_message->recipients->prev = new_recipient;
+            
+            rec_p++;
+        }
 
 		new_message->next = mailbox->head;
 		new_message->prev = mailbox->head->prev;
@@ -77,7 +102,52 @@ int add_to_mailbox()
 
 int get_from_mailbox(char *message, int recipient)
 {
-
-
-	return OK;
+    // Return error if there are no messages in the mailbox
+    if (!mailbox || mailbox->number_of_messages == 0) {
+        printf("Error: mailbox is empty or has not been created\n");
+        return ERROR;
+    }
+    else {
+        int i = 0;
+        message_t *message_ptr = mailbox->head;
+        // Iterate over existing messages
+        while (i < mailbox->number_of_messages) {
+            pid_node_t *recipient_p = message_ptr->recipients;
+            // Iterate over messages assigned recipients
+            while (recipient_p->next != recipient_p &&
+                   recipient_p->prev != recipient_p)
+            {
+                // If the message was sent to current recipient consume it
+                if (recipient_p->pid == recipient) {
+                    // Reserve memory for the destination string
+                    int message_len = message_ptr->message;
+                    message = malloc(message_len*sizeof(char));
+                    // Copy the content of the message
+                    memcpy(message, message_ptr->message, message_len);
+                    // Remove recipient
+                    recipient_p->prev->next = recipient_p->next;
+                    recipient_p->next->prev = recipient_p->prev;
+                    pid_node_t *next_node = recipient_p->next;
+                    free(recipient_p);
+                    // Test if the message has to be garbage collected
+                    if (next_node -> next == next &&
+                        next_node -> prev == next) {
+                        message_ptr->prev->next = message_ptr->next;
+                        message_ptr->next->prev = message_ptr->prev;
+                        free(message_ptr);
+                    }
+                    return OK;
+                }
+                //Otherwise increment recivers pointer
+                else {
+                    recipients+=sizeof(pid_node_t);
+                }
+            }
+            // Increment message pointer and counter
+            message_ptr += sizeof(message_t);
+            i++;
+        }
+    }
+    // In case of not find a message for the recipient return error
+    return ERROR;
 }
