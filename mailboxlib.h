@@ -7,7 +7,8 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <ipc.h>
+#include <lib.h>
+#include <string.h>
 
 #define MAX_MESSAGE_COUNT 16
 #define OK 0
@@ -16,15 +17,12 @@
 int create_mailbox();
 
 /* Message LinkedList
- * recipients_num - total number of recipients (will be decremented each time
-                    this message is retrieved by one of its recipients
  * recipients - recipients of this message
  * message - the message value
  * next - pointer to next message
  */
 
 typedef struct message_struct {
-  int recipients_num;
   int *recipients;
   char *message;
   struct message_struct *prev;

@@ -1,7 +1,7 @@
 /* File mailbox.c */
 /* Define system calls to the mailbox */
 
-#include <mailboxlib.h>
+#include "mailboxlib.h"
 
 static mailbox_t *mailbox;
 
@@ -40,7 +40,6 @@ int add_to_mailbox(char *message, int *recipients)
 	if (mailbox->number_of_messages < MAX_MESSAGE_COUNT)
 	{
 	  	message_t *new_message = malloc(sizeof(message_t));
-		new_message->recipients_num = recipients_num;
 		new_message->recipients = recipients;
 		new_message->message = message;
 
