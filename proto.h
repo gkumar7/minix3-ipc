@@ -47,7 +47,6 @@ int do_getepinfo(void);
 int do_svrctl(void);
 int do_getsetpriority(void);
 int do_getrusage(void);
-int add_to_mailbox(void);
 
 /* schedule.c */
 void sched_init(void);
@@ -94,3 +93,4 @@ void set_rusage_times(struct rusage *r_usage, clock_t user_time,
 	clock_t sys_time);
 
 /* mailbox.c */
+int add_to_mailbox(void);
