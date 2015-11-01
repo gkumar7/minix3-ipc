@@ -49,11 +49,11 @@ int send_message(char *messageData, int *recipients)
 	char recipientsString[128];  // 6 [5 from pid + 1 from separator] * 16, will be always lower than 128
 
 
-	for (i = 0; i < arraySize; i ++)
+	for (i = 0; i < arraySize-1; i ++)
 	{
-		snprintf(recipientsString, 128, "%d", recipients[i]);
-		strncat(recipientsString, " ", 1);
+		snprintf(recipientsString, 128, "%d ", recipients[i]);
 	}
+	snprintf(recipientsString, 128, "%d", recipients[arraySize-1]);
 
 	printf("Maping message %s to pids %s\n", messageData, recipientsString);
 

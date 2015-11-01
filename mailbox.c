@@ -2,6 +2,7 @@
 /* Define system calls to the mailbox */
 
 #include "mailboxlib.h"
+#include "glo.h"
 
 static mailbox_t *mailbox;
 
