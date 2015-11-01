@@ -62,14 +62,18 @@ int send_message(char *messageData, int *recipients)
 	message m;
 	int arraySize = sizeof(recipients);
 	int i;
-	char recipientsString[128];  // 6 [5 from pid + 1 from separator] * 16, will be always lower than 128
+	//char recipientsString[128];  // 6 [5 from pid + 1 from separator] * 16, will be always lower than 128
+	char *recipientsString;
 
+	recipientsString = (char *) malloc(6);
+	snprintf(recipientsString, 6, "%d ", recipients[0]);
 
-	for (i = 0; i < arraySize-1; i ++)
+	for (i = 1; i < arraySize; i ++)
 	{
-		snprintf(recipientsString, 128, "%d ", recipients[i]);
+		recipientsString = (char *) realloc (recipientsString, 6 * (i+1));
+		snprintf(recipientsString, 6, "%d ", recipients[i]);
 	}
-	snprintf(recipientsString, 128, "%d", recipients[arraySize-1]);
+	//snprintf(recipientsString, 128, "%d", recipients[arraySize-1]);
 
 	printf("Maping message %s to pids %s\n", messageData, recipientsString);
 
