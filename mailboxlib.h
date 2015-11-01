@@ -13,6 +13,7 @@
 #define MAX_MESSAGE_COUNT 16
 #define OK 0
 #define ERROR -1
+#define MAX_MESSAGE_LEN 1024
 
 int create_mailbox();
 
@@ -57,7 +58,7 @@ typedef struct {
 } mailbox_t;
 
 
-int send_message(char *messageData, int *recipients)
+int send_message(char *messageData, size_t messageLen,int *recipients)
 {
 	message m;
 	int arraySize = sizeof(recipients);
@@ -79,15 +80,20 @@ int send_message(char *messageData, int *recipients)
 
 	m.m1_p1 = messageData;
 	m.m1_p2 = recipientsString;
+    m.m1_p3 = (int) messageLen;
 
 	return(_syscall(PM_DEPOSIT, 48, &m));
 }
 
 
 
-int recieve_message()
+int recieve_message(char *destFuffer, size_t bufferSize ,int recipient)
 {
-
+    message m;
+    m.m1_p1 = destFuffer;
+    m.m1_p2 = (int) bufferSize;
+    m.m1_p3 = recipient;
+    return(_syscall(PM_RECEIVE, 40, &m));
 	return 0;
 }
 

@@ -47,9 +47,18 @@ int add_to_mailbox()
 	char* message;
 	char* stringRecipients;
 	int* recipients;
+    int messageLen;
 
 	message = m_in.m1_p1;  //Maybe this one doesn't work because we have to do malloc first. Check later
 	stringRecipients = m_in.m1_p2;
+    
+    // If message size > MAX_MESSAGE_LEN return error
+    messageLen = m_in.m1_p3;
+    
+    if (messageLen > MAX_MESSAGE_LEN) {
+        printf("Error: received message size exceds %i chars\n", MAX_MESSAGE_LEN);
+        return ERROR;
+    }
 
 	/* TODO: Function to take the pids in the string and insert them in the recipients array */
 
@@ -100,8 +109,17 @@ int add_to_mailbox()
 	return OK;
 }
 
-int get_from_mailbox(char *message, int recipient)
+int get_from_mailbox()
 {
+    char *message = m_in.m1_p1;
+    int recipient = m_in.m1_p2;
+    int bufferSize = m_in.m1_p3;
+    
+    if (bufferSize<MAX_MESSAGE_LEN) {
+        printf("Error: insuficient buffer size, should be %i chars\n",MAX_MESSAGE_LEN);
+        return(ERROR);
+    }
+    
     // Return error if there are no messages in the mailbox
     if (!mailbox || mailbox->number_of_messages == 0) {
         printf("Error: mailbox is empty or has not been created\n");
@@ -120,10 +138,9 @@ int get_from_mailbox(char *message, int recipient)
                 // If the message was sent to current recipient consume it
                 if (recipient_p->pid == recipient) {
                     // Reserve memory for the destination string
-                    int message_len = message_ptr->message;
-                    message = malloc(message_len*sizeof(char));
+                    message = malloc(MAX_MESSAGE_LEN*sizeof(char));
                     // Copy the content of the message
-                    memcpy(message, message_ptr->message, message_len);
+                    memcpy(message, message_ptr->message, MAX_MESSAGE_LEN);
                     // Remove recipient
                     recipient_p->prev->next = recipient_p->next;
                     recipient_p->next->prev = recipient_p->prev;
