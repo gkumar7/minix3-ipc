@@ -5,6 +5,14 @@
 
 static mailbox_t *mailbox;
 
+/* Maybe we don't need this, but leave it for now */
+int stringToArray(char* stringListOfPids)
+{
+
+	return 0;
+}
+
+
 int create_mailbox(){
 	mailbox = malloc(sizeof(mailbox_t));
 	mailbox->head = malloc(sizeof(message_t));
@@ -25,11 +33,17 @@ int create_mailbox(){
  * Add message to mailbox (if mailbox is not full)
  * Returns OK if message was successfully added
  * Returns ERROR if mailbox is full
- *
- * TODO: Remove parameters and use a message type
  */
-int add_to_mailbox(char *message, int *recipients)
+int add_to_mailbox()
 {
+	char* message;
+	char* stringRecipients;
+	int* recipients;
+
+	message = m_in.m1_p1;  //Maybe this one doesn't work because we have to do malloc first. Check later
+	stringRecipients = m_in.m1_p2;
+
+	/* TODO: Function to take the pids in the string and insert them in the recipients array */
 
 	//If the mailbox doesn't exist, we create it first
 	if (!mailbox)
