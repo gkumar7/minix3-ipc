@@ -232,11 +232,12 @@ int get_from_mailbox()
                     recipient_p->prev->next = recipient_p->next;
                     recipient_p->next->prev = recipient_p->prev;
                     pid_node_t *next_node = recipient_p->next;
+                    pid_node_t *prev_node = recipient_p->prev;
                     /**/
                     free(recipient_p);
 
                     // Test if the message has to be garbage collected
-                    if (next_node->pid == -1)
+                    if ((next_node->pid == -1) && (prev_node->pid == -1))
                     {
                         message_ptr->prev->next = message_ptr->next;
                         message_ptr->next->prev = message_ptr->prev;
@@ -259,5 +260,6 @@ int get_from_mailbox()
         }
     }
     // In case of not find a message for the recipient return error
+
     return ERROR;
 }
