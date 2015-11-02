@@ -15,8 +15,6 @@
 #define ERROR -1
 #define MAX_MESSAGE_LEN 1024
 
-int create_mailbox();
-
 /* PID LinkedList
  * pid: PID of a recipient process
  * prev: previous recipient process
@@ -24,32 +22,28 @@ int create_mailbox();
  */
 
 typedef struct pid_node {
-    struct pid_list *prev;
+    struct pid_node *prev;
     int pid;
-    struct pid_list *next;
+    struct pid_node *next;
 } pid_node_t;
 
 /* Message LinkedList
  * recipients - recipients of this message
  * message - the message value
  * next - pointer to next message
+ * prev - pointer to prev message
  */
 
 typedef struct message_struct {
-    //int recipients_num;
-    //int *recipients;
     pid_node_t *recipients;
     char *message;
     struct message_struct *prev;
     struct message_struct *next;
 } message_t;
 
-int init_msg_pid_list(message_t *m);
-
 /* Mailbox
  * number_of_messages - current number of messages in the mailbox (limit is 16)
  * head - pointer to head of message linked list
- * last_msg - pointer to last message of the linked list
  */
 
 typedef struct {
@@ -57,8 +51,10 @@ typedef struct {
   message_t *head;
 } mailbox_t;
 
+int create_mailbox();
+int init_msg_pid_list(message_t *m);
 
-int send_message(char *messageData, size_t messageLen,int *recipients)
+int send_message(char *messageData, size_t messageLen, int *recipients)
 {
 	message m;
 	int arraySize = sizeof(recipients);
@@ -80,21 +76,20 @@ int send_message(char *messageData, size_t messageLen,int *recipients)
 
 	m.m1_p1 = messageData;
 	m.m1_p2 = recipientsString;
-    m.m1_i1 = (int) messageLen;
+	m.m1_i1 = (int) messageLen;
 
-	return(_syscall(PM_DEPOSIT, 48, &m));
+	return(_syscall(PM_PROC_NR, PM_DEPOSIT, &m));
 }
 
 
 
 int recieve_message(char *destFuffer, size_t bufferSize ,int recipient)
 {
-    message m;
-    m.m1_p1 = destFuffer;
-    m.m1_p2 = (int) bufferSize;
-    m.m1_p3 = recipient;
-    return(_syscall(PM_RECEIVE, 40, &m));
-	return 0;
+        message m;
+	m.m1_p1 = destFuffer;
+	m.m1_p2 = (int) bufferSize;
+	m.m1_p3 = recipient;
+	return(_syscall(PM_PROC_NR, PM_RETRIEVE, &m));
 }
 
 #endif

@@ -53,7 +53,7 @@
 #define PM_REBOOT		(PM_BASE + 37)
 #define PM_SVRCTL		(PM_BASE + 38)
 #define PM_SPROF		(PM_BASE + 39)
-#define PM_RETRIEVE     (PM_BASE + 40) //get_from_mailbox
+#define PM_RETRIEVE             (PM_BASE + 40) //get_from_mailbox
 #define PM_SRV_FORK		(PM_BASE + 41)
 #define PM_SRV_KILL		(PM_BASE + 42)
 #define PM_EXEC_NEW		(PM_BASE + 43)
@@ -61,7 +61,7 @@
 #define PM_GETEPINFO		(PM_BASE + 45)
 #define PM_GETPROCNR		(PM_BASE + 46)
 #define PM_GETSYSINFO		(PM_BASE + 47)
-#define PM_DEPOSIT                 (PM_BASE + 48) //add_to_mailbox
+#define PM_DEPOSIT              (PM_BASE + 48) //add_to_mailbox
 
 #define NR_PM_CALLS		49	/* highest number from base plus one */
 
