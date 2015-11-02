@@ -59,6 +59,7 @@ int add_to_mailbox()
 	messageLen = m_in.m1_i1;
 	recipientsStringLen = m_in.m1_i2;
 
+
 	printf("Mailbox: recipientsStringLen is %d\n", recipientsStringLen);
 
 	if (messageLen > MAX_MESSAGE_LEN) {
@@ -74,6 +75,8 @@ int add_to_mailbox()
 
 	sys_datacopy(who_e, (vir_bytes)m_in.m1_p1, SELF, (vir_bytes)message, messageBytes);
 	sys_datacopy(who_e, (vir_bytes)m_in.m1_p2, SELF, (vir_bytes)stringRecipients, recipientsStringBytes);
+
+	//printf("Mailbox: recipientsString is %s\n", stringRecipients);
 
 	/* TODO: Function to take the pids in the string and insert them in the recipients array */
 
@@ -94,6 +97,7 @@ int add_to_mailbox()
 	  const char delim[2] = " ";
 	  char *rec_p = strtok(stringRecipients, delim);
 
+	  printf("*Debug: first pid is %s\n", rec_p);
 	  while (rec_p != NULL) {
             pid_node_t *new_recipient = malloc(sizeof(pid_node_t));
 
@@ -106,6 +110,11 @@ int add_to_mailbox()
             new_message->recipients->prev = new_recipient;
 
             rec_p = strtok(NULL, delim);
+            if (rec_p != NULL)
+            {
+            	printf("*Debug: next pid will be %s\n", rec_p);
+            }
+
 	  }
 
 	  new_message->next = mailbox->head;

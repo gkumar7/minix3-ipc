@@ -28,7 +28,8 @@ int main(int argc, char* argv[])
 
 	printf("Test 01: Calling send_message\n");
 
-	printf("*Debug: send_message( message %s; pids %i, %i, %i, %i)\n", message, strlen(message), recieversPid[0], recieversPid[1],recieversPid[2]);
+
+	printf("*Debug: send_message( message %s; strlen %i; pids are %i, %i, %i)\n", message, strlen(message), recieversPid[0], recieversPid[1],recieversPid[2]);
 	//char *test = "Hello, this is a test!";
 
 	/*int testPid[2];
