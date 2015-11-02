@@ -91,7 +91,9 @@ int recieve_message(char *destBuffer, size_t bufferSize ,int recipient)
 	m.m1_p1 = destBuffer;
 	m.m1_i1 = recipient;
 	m.m1_i2 = (int) bufferSize;
-	return(_syscall(PM_PROC_NR, PM_RETRIEVE, &m));
+	int status = _syscall(PM_PROC_NR, PM_RETRIEVE, &m);
+	printf("User: message \"%s\" received\n", m.m1_p1);
+	return status;
 }
 
 #endif
