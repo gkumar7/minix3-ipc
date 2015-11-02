@@ -114,10 +114,10 @@ int add_to_mailbox()
 
 	  mailbox->number_of_messages += 1;
 
-	  printf("Kernel: Current amount of messages in mailbox: %d\n", mailbox->number_of_messages);
-	  printf("Kernel: Added message \"%s\" to mailbox\n", message);
-	  printf("Kernel: Message sent to pids: %s\n", stringRecipients);
-	  printf("Kernel: Message length: %d\n", messageLen);
+	  printf("Mailbox: Current amount of messages in mailbox: %d\n", mailbox->number_of_messages);
+	  printf("Mailbox: Added message \"%s\" to mailbox\n", message);
+	  printf("Mailbox: Message sent to pids: %s\n", stringRecipients);
+	  printf("Mailbox: Message length: %d\n", messageLen);
 	}
 	else
 	{
@@ -172,8 +172,11 @@ int get_from_mailbox()
                     if (next_node->next->pid == -1) {
                         message_ptr->prev->next = message_ptr->next;
                         message_ptr->next->prev = message_ptr->prev;
+			printf("Mailbox: Message \"%s\" has been garbage collected\n", message_ptr->message);
                         free(message_ptr);
+			mailbox->number_of_messages--;
                     }
+
                     return OK;
                 }
                 //Otherwise increment recipient's pointer
