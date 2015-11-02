@@ -68,7 +68,7 @@ int send_message(char *messageData, size_t messageLen, int *recipients, int reci
 	for (i = 1; i < recipientsLen; i ++)
 	{
 		recipientsString = (char *) realloc (recipientsString, 6 * (i+1));
-		written = snprintf(recipientsString+written, 6, "%d ", *(recipients+i));
+		written = snprintf(recipientsString + (written*i), 6, "%d ", *(recipients+i));
 		recipientsStringLen += 6;
 	}
 	//snprintf(recipientsString, 128, "%d", recipients[recipientsLen-1]);

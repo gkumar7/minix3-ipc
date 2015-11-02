@@ -60,8 +60,6 @@ int add_to_mailbox()
 	recipientsStringLen = m_in.m1_i2;
 
 
-	printf("Mailbox: recipientsStringLen is %d\n", recipientsStringLen);
-
 	if (messageLen > MAX_MESSAGE_LEN) {
 	  printf("Error: received message size exceeds %d chars\n", MAX_MESSAGE_LEN);
 	  return ERROR;
@@ -75,6 +73,10 @@ int add_to_mailbox()
 
 	sys_datacopy(who_e, (vir_bytes)m_in.m1_p1, SELF, (vir_bytes)message, messageBytes);
 	sys_datacopy(who_e, (vir_bytes)m_in.m1_p2, SELF, (vir_bytes)stringRecipients, recipientsStringBytes);
+
+	printf("Mailbox: New message received. Message content: %s\n", message);
+	printf("Mailbox: *stringRecipients is %s\n", stringRecipients);
+	printf("Mailbox: *recipientsStringLen is %d\n", recipientsStringLen);
 
 	//printf("Mailbox: recipientsString is %s\n", stringRecipients);
 
