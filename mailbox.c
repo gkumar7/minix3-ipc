@@ -53,21 +53,25 @@ int add_to_mailbox()
 	char* message;
 	char* stringRecipients;
 	int messageLen;
+	int recipientsStringLen;
 
 	// If message size > MAX_MESSAGE_LEN return error
 	messageLen = m_in.m1_i1;
+	recipientsStringLen = m_in.m1_i2;
 
 	if (messageLen > MAX_MESSAGE_LEN) {
-	  printf("Error: received message size exceds %i chars\n", MAX_MESSAGE_LEN);
+	  printf("Error: received message size exceeds %d chars\n", MAX_MESSAGE_LEN);
 	  return ERROR;
 	}
 
 	int messageBytes = messageLen * sizeof(char);
+	int recipientsStringBytes = recipientsStringLen * sizeof(char);
 
 	message = malloc(messageBytes);
-	stringRecipients = m_in.m1_p2;
+	stringRecipients = malloc(recipientsStringBytes);
 
 	sys_datacopy(who_e, (vir_bytes)m_in.m1_p1, SELF, (vir_bytes)message, messageBytes);
+	sys_datacopy(who_e, (vir_bytes)m_in.m1_p2, SELF, (vir_bytes)stringRecipients, recipientsStringBytes);
 
 	/* TODO: Function to take the pids in the string and insert them in the recipients array */
 
@@ -110,9 +114,10 @@ int add_to_mailbox()
 
 	  mailbox->number_of_messages += 1;
 
-	  printf("Current amount of messages in mailbox: %d\n", mailbox->number_of_messages);
-	  printf("Added message \"%s\" to mailbox\n", message);
-	  printf("Message length: %d\n", messageLen);
+	  printf("Kernel: Current amount of messages in mailbox: %d\n", mailbox->number_of_messages);
+	  printf("Kernel: Added message \"%s\" to mailbox\n", message);
+	  printf("Kernel: Message sent to pids: %s\n", stringRecipients);
+	  printf("Kernel: Message length: %d\n", messageLen);
 	}
 	else
 	{
@@ -125,12 +130,12 @@ int add_to_mailbox()
 
 int get_from_mailbox()
 {
-    char *message = m_in.m1_p1;
+    char *message;
     int recipient = m_in.m1_i1;
     int bufferSize = m_in.m1_i2;
 
     if (bufferSize < MAX_MESSAGE_LEN) {
-        printf("Error: insufficient buffer size, should be %i chars\n", MAX_MESSAGE_LEN);
+        printf("Error: insufficient buffer size, should be %d chars\n", MAX_MESSAGE_LEN);
         return(ERROR);
     }
 
@@ -152,10 +157,10 @@ int get_from_mailbox()
             {
                 // If the message was sent to current recipient consume it
                 if (recipient_p->pid == recipient) {
-                    // Reserve memory for the destination string
-                    message = malloc(MAX_MESSAGE_LEN*sizeof(char));
+
+		    int messageBytes = strlen(message_ptr->message) * sizeof(char);
                     // Copy the content of the message
-                    memcpy(message, message_ptr->message, MAX_MESSAGE_LEN);
+		    sys_datacopy(SELF, (vir_bytes)message_ptr->message, who_e, (vir_bytes)m_in.m1_p1, messageBytes);
 
                     // Remove recipient
                     recipient_p->prev->next = recipient_p->next;
