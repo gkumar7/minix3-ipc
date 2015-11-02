@@ -87,12 +87,20 @@ int send_message(char *messageData, size_t messageLen, int *recipients, int reci
 
 int receive_message(char *destBuffer, size_t bufferSize ,int recipient)
 {
-        message m;
+    message m;
 	m.m1_p1 = destBuffer;
 	m.m1_i1 = recipient;
 	m.m1_i2 = (int) bufferSize;
 	int status = _syscall(PM_PROC_NR, PM_RETRIEVE, &m);
-	printf("User: message \"%s\" received\n", destBuffer);
+	if (status == ERROR)
+	{
+		printf("ERROR: There is no message for the process\n");
+	}
+	else
+	{
+		printf("+User: message (%d bytes) \"%s\" received\n", m.m1_i2, destBuffer);
+	}
+
 	return status;
 }
 

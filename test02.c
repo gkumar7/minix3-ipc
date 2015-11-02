@@ -18,9 +18,8 @@ int main(int argc, char* argv[])
 	char destBuffer[MAX_MESSAGE_LEN];
 
 	printf("Test 02: Calling get_message\n");
-	receive_message(destBuffer, sizeof(destBuffer), processPid );
 
-	if ( strlen(destBuffer) != 0)
+	if (receive_message(destBuffer, sizeof(destBuffer), processPid) == OK)
 	{
 		printf("***The process has received a new message***\n");
 		printf("The message is: %s\n", destBuffer);

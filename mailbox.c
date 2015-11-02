@@ -18,6 +18,7 @@ int stringToArray(char* stringListOfPids)
 
 int print_all_messages()
 {
+
 	int i;
 	message_t *message_ptr = mailbox->head;
 
@@ -41,7 +42,6 @@ int print_all_messages()
 		 }
 		 printf("\n");
 	}
-
 
 	return 0;
 }
@@ -93,9 +93,10 @@ int add_to_mailbox()
 	recipientsStringLen = m_in.m1_i2;
 
 
-	if (messageLen > MAX_MESSAGE_LEN) {
-	  printf("Error: received message size exceeds %d chars\n", MAX_MESSAGE_LEN);
-	  return ERROR;
+	if (messageLen > MAX_MESSAGE_LEN)
+	{
+		printf("Error: received message size exceeds %d chars\n", MAX_MESSAGE_LEN);
+		return ERROR;
 	}
 
 	int messageBytes = messageLen * sizeof(char);
@@ -107,7 +108,7 @@ int add_to_mailbox()
 	sys_datacopy(who_e, (vir_bytes)m_in.m1_p1, SELF, (vir_bytes)message, messageBytes);
 	sys_datacopy(who_e, (vir_bytes)m_in.m1_p2, SELF, (vir_bytes)stringRecipients, recipientsStringBytes);
 
-	printf("Mailbox: New message received. Message content: %s\n", message);
+	printf("Mailbox: New message received. Message content with %d bytes: %s\n", messageBytes, message);
 	printf("Mailbox: *stringRecipients is %s\n", stringRecipients);
 	printf("Mailbox: *recipientsStringLen is %d\n", recipientsStringLen);
 
@@ -185,7 +186,7 @@ int get_from_mailbox()
     int recipient = m_in.m1_i1;
     int bufferSize = m_in.m1_i2;
 
-    printf("Mailbox: get_mail request recieved. Receiver pid: %d. Buffer size: %d\n", recipient, bufferSize);
+    printf("Mailbox: get_mail request received. Receiver pid: %d. Buffer size: %d\n", recipient, bufferSize);
 
 
     if (bufferSize < MAX_MESSAGE_LEN)
@@ -208,7 +209,7 @@ int get_from_mailbox()
         // Iterate over existing messages
         while (i < mailbox->number_of_messages)
         {
-        	printf("Mailbox:Checking message number %d\n", i);
+        	printf("Mailbox: Checking message number %d\n", i);
             pid_node_t *recipient_p = message_ptr->recipients->next;
         	//pid_node_t *recipient_p = message_ptr->recipients;
 
@@ -219,7 +220,7 @@ int get_from_mailbox()
                 // If the message was sent to current recipient consume it
                 if (recipient_p->pid == recipient)
                 {
-                	printf("Mailbox:Pid %d success\n", recipient_p->pid);
+                	printf("Mailbox: Pid %d success\n", recipient_p->pid);
 
 					int messageBytes = strlen(message_ptr->message) * sizeof(char);
 					// Copy the content of the message
@@ -239,7 +240,7 @@ int get_from_mailbox()
                     {
                         message_ptr->prev->next = message_ptr->next;
                         message_ptr->next->prev = message_ptr->prev;
-                        printf("Mailbox: Message \"%s\" has been garbage collected\n", message_ptr->message);
+                        printf("+Mailbox: Message \"%s\" has been garbage collected\n", message_ptr->message);
                         free(message_ptr);
                         mailbox->number_of_messages--;
                     }
