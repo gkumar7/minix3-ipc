@@ -62,13 +62,13 @@ int send_message(char *messageData, size_t messageLen, int *recipients, int reci
 	char *recipientsString;
 
 	recipientsString = (char *) malloc(6);
-	snprintf(recipientsString, 6, "%d ", *recipients);
+	int written = snprintf(recipientsString, 6, "%d ", *recipients);
 
 	int recipientsStringLen = 6;
 	for (i = 1; i < recipientsLen; i ++)
 	{
 		recipientsString = (char *) realloc (recipientsString, 6 * (i+1));
-		snprintf(recipientsString, 6, "%d ", *(recipients+i));
+		written = snprintf(recipientsString+written, 6, "%d ", *(recipients+i));
 		recipientsStringLen += 6;
 	}
 	//snprintf(recipientsString, 128, "%d", recipients[recipientsLen-1]);
@@ -92,7 +92,7 @@ int recieve_message(char *destBuffer, size_t bufferSize ,int recipient)
 	m.m1_i1 = recipient;
 	m.m1_i2 = (int) bufferSize;
 	int status = _syscall(PM_PROC_NR, PM_RETRIEVE, &m);
-	printf("User: message \"%s\" received\n", m.m1_p1);
+	printf("User: message \"%s\" received\n", destBuffer);
 	return status;
 }
 
