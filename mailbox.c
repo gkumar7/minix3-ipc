@@ -15,6 +15,39 @@ int stringToArray(char* stringListOfPids)
 }
 
 
+
+int print_all_messages()
+{
+	int i;
+	message_t *message_ptr = mailbox->head;
+
+	for (i = 1; i <= mailbox->number_of_messages; i++)
+	{
+		 message_ptr = message_ptr -> next;
+
+		 pid_node_t *pids = message_ptr-> recipients;
+		 char *message = message_ptr -> message;
+
+		 printf("**Message number %d\n", i);
+		 printf("**Message content %s\n", message);
+		 printf("**Recipients: ");
+
+		 pids = pids -> next;
+
+		 while(pids->pid != -1)
+		 {
+			 printf(" %d, ", pids->pid);
+			 pids = pids -> next;
+		 }
+		 printf("\n");
+	}
+
+
+	return 0;
+}
+
+
+
 /* Used to create a new mailbox */
 int create_mailbox(){
 	mailbox = malloc(sizeof(mailbox_t));
@@ -100,7 +133,8 @@ int add_to_mailbox()
 	  char *rec_p = strtok(stringRecipients, delim);
 
 	  printf("*Debug: first pid is %s\n", rec_p);
-	  while (rec_p != NULL) {
+	  while (rec_p != NULL)
+	  {
             pid_node_t *new_recipient = malloc(sizeof(pid_node_t));
 
             new_recipient->pid = atoi(rec_p);
@@ -127,10 +161,13 @@ int add_to_mailbox()
 
 	  mailbox->number_of_messages += 1;
 
+
 	  printf("Mailbox: Current amount of messages in mailbox: %d\n", mailbox->number_of_messages);
-	  printf("Mailbox: Added message \"%s\" to mailbox\n", message);
-	  printf("Mailbox: Message sent to pids: %s\n", stringRecipients);
-	  printf("Mailbox: Message length: %d\n", messageLen);
+
+	  print_all_messages();
+
+	  /*printf("Mailbox: Added message \"%s\" to mailbox\n", message);
+	  printf("Mailbox: Message length: %d\n", messageLen);*/
 	}
 	else
 	{
@@ -141,67 +178,84 @@ int add_to_mailbox()
 	return OK;
 }
 
+
 int get_from_mailbox()
 {
     char *message;
     int recipient = m_in.m1_i1;
     int bufferSize = m_in.m1_i2;
 
-    if (bufferSize < MAX_MESSAGE_LEN) {
+    printf("Mailbox: get_mail request recieved. Receiver pid: %d. Buffer size: %d\n", recipient, bufferSize);
+
+
+    if (bufferSize < MAX_MESSAGE_LEN)
+    {
         printf("Error: insufficient buffer size, should be %d chars\n", MAX_MESSAGE_LEN);
         return(ERROR);
     }
 
     // Return error if there are no messages in the mailbox
-    if (!mailbox || mailbox->number_of_messages == 0) {
+    if (!mailbox || mailbox->number_of_messages == 0)
+    {
         printf("Error: mailbox is empty or has not been created\n");
         return ERROR;
     }
-    else {
+    else
+    {
         int i = 0;
         message_t *message_ptr = mailbox->head->next;
 
         // Iterate over existing messages
-        while (i < mailbox->number_of_messages) {
+        while (i < mailbox->number_of_messages)
+        {
+        	printf("Mailbox:Checking message number %d\n", i);
             pid_node_t *recipient_p = message_ptr->recipients->next;
+        	//pid_node_t *recipient_p = message_ptr->recipients;
 
             // Iterate over messages assigned recipients
             while (recipient_p->pid != -1)
             {
+            	printf("Mailbox:Checking pid %d\n", recipient_p->pid);
                 // If the message was sent to current recipient consume it
-                if (recipient_p->pid == recipient) {
+                if (recipient_p->pid == recipient)
+                {
+                	printf("Mailbox:Pid %d success\n", recipient_p->pid);
 
-		    int messageBytes = strlen(message_ptr->message) * sizeof(char);
-                    // Copy the content of the message
-		    sys_datacopy(SELF, (vir_bytes)message_ptr->message, who_e, (vir_bytes)m_in.m1_p1, messageBytes);
+					int messageBytes = strlen(message_ptr->message) * sizeof(char);
+					// Copy the content of the message
+					sys_datacopy(SELF, (vir_bytes)message_ptr->message, who_e, (vir_bytes)m_in.m1_p1, messageBytes);
+
+					printf("Mailbox: Message obtained is %s\n", m_in.m1_p1);
 
                     // Remove recipient
                     recipient_p->prev->next = recipient_p->next;
                     recipient_p->next->prev = recipient_p->prev;
                     pid_node_t *next_node = recipient_p->next;
+                    /**/
                     free(recipient_p);
 
                     // Test if the message has to be garbage collected
-                    if (next_node->next->pid == -1) {
+                    if (next_node->pid == -1)
+                    {
                         message_ptr->prev->next = message_ptr->next;
                         message_ptr->next->prev = message_ptr->prev;
-			printf("Mailbox: Message \"%s\" has been garbage collected\n", message_ptr->message);
+                        printf("Mailbox: Message \"%s\" has been garbage collected\n", message_ptr->message);
                         free(message_ptr);
-			mailbox->number_of_messages--;
+                        mailbox->number_of_messages--;
                     }
 
                     return OK;
                 }
                 //Otherwise increment recipient's pointer
-                else {
-		  recipient_p = recipient_p->next;
+                else
+                {
+                	recipient_p = recipient_p->next;
                 }
             }
             // Increment message pointer and counter
-	    message_ptr = message_ptr->next;
-	    i++;
-	}
-
+            message_ptr = message_ptr->next;
+            i++;
+        }
     }
     // In case of not find a message for the recipient return error
     return ERROR;
