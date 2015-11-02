@@ -20,7 +20,15 @@ int main(int argc, char* argv[])
 	printf("Test 02: Calling get_message\n");
 	recieve_message(destBuffer, sizeof(destBuffer), processPid );
 
-	printf("***The process has received a new message***\n");
-	printf("The message is: %s\n", destBuffer);
+	if ( strlen(destBuffer) != 0)
+	{
+		printf("***The process has received a new message***\n");
+		printf("The message is: %s\n", destBuffer);
+	}
+	else
+	{
+		printf("There are no messages for this process\n");
+	}
+
 	return 0;
 }
