@@ -1,3 +1,7 @@
+/* ================================================= *
+ *     Test 01: Testing send_message function        *
+ * ================================================= */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <lib.h>
