@@ -2,6 +2,7 @@
 /* Define system calls to the mailbox */
 
 #include "mailboxlib.h"
+#include <minix/syslib.h>
 #include "glo.h"
 
 static mailbox_t *mailbox;
@@ -53,9 +54,6 @@ int add_to_mailbox()
 	char* stringRecipients;
 	int messageLen;
 
-	message = m_in.m1_p1;  //Maybe this one doesn't work because we have to do malloc first. Check later
-	stringRecipients = m_in.m1_p2;
-
 	// If message size > MAX_MESSAGE_LEN return error
 	messageLen = m_in.m1_i1;
 
@@ -63,6 +61,13 @@ int add_to_mailbox()
 	  printf("Error: received message size exceds %i chars\n", MAX_MESSAGE_LEN);
 	  return ERROR;
 	}
+
+	int messageBytes = messageLen * sizeof(char);
+
+	message = malloc(messageBytes);
+	stringRecipients = m_in.m1_p2;
+
+	sys_datacopy(who_e, (vir_bytes)m_in.m1_p1, SELF, (vir_bytes)message, messageBytes);
 
 	/* TODO: Function to take the pids in the string and insert them in the recipients array */
 
@@ -106,7 +111,8 @@ int add_to_mailbox()
 	  mailbox->number_of_messages += 1;
 
 	  printf("Current amount of messages in mailbox: %d\n", mailbox->number_of_messages);
-	  printf("Recipients of this message %s\n", stringRecipients);
+	  printf("Added message \"%s\" to mailbox\n", message);
+	  printf("Message length: %d\n", messageLen);
 	}
 	else
 	{
