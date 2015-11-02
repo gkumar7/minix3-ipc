@@ -104,6 +104,9 @@ int add_to_mailbox()
 	  mailbox->head->prev = new_message;
 
 	  mailbox->number_of_messages += 1;
+
+	  printf("Current amount of messages in mailbox: %d\n", mailbox->number_of_messages);
+	  printf("Recipients of this message %s\n", stringRecipients);
 	}
 	else
 	{

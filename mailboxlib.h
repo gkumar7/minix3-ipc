@@ -87,8 +87,8 @@ int recieve_message(char *destFuffer, size_t bufferSize ,int recipient)
 {
         message m;
 	m.m1_p1 = destFuffer;
-	m.m1_p2 = (int) bufferSize;
-	m.m1_p3 = recipient;
+	m.m1_i1 = (int) bufferSize;
+	m.m1_i2 = recipient;
 	return(_syscall(PM_PROC_NR, PM_RETRIEVE, &m));
 }
 
