@@ -142,7 +142,7 @@ int add_to_mailbox()
             new_recipient->next = new_message->recipients;
             new_recipient->prev = new_message->recipients->prev;
 
-            new_message->recipients->next = new_recipient;
+            new_message->recipients->prev->next = new_recipient;
             new_message->recipients->prev = new_recipient;
 
             rec_p = strtok(NULL, delim);
