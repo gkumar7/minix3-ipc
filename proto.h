@@ -93,5 +93,5 @@ void set_rusage_times(struct rusage *r_usage, clock_t user_time,
 	clock_t sys_time);
 
 /* mailbox.c */
-int add_to_mailbox(void);
+int add_to_mailbox();
 int get_from_mailbox();

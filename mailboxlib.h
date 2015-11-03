@@ -85,7 +85,7 @@ int send_message(char *messageData, size_t messageLen, int *recipients, int reci
 
 
 
-int recieve_message(char *destBuffer, size_t bufferSize ,int recipient)
+int receive_message(char *destBuffer, size_t bufferSize ,int recipient)
 {
         message m;
 	m.m1_p1 = destBuffer;
