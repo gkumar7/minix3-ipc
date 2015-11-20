@@ -9,50 +9,28 @@
 #include <stdio.h>
 #include <lib.h>
 #include <string.h>
+#include <pwd.h>
 
-#define MAX_MESSAGE_COUNT 16
 #define OK 0
 #define ERROR -1
-#define MAX_MESSAGE_LEN 1024
 
-/* PID LinkedList
- * pid: PID of a recipient process
- * prev: previous recipient process
- * next: following recipient process
- */
 
-typedef struct pid_node {
-    struct pid_node *prev;
-    int pid;
-    struct pid_node *next;
-} pid_node_t;
+int add_user(char *username, int privileges){
 
-/* Message LinkedList
- * recipients - recipients of this message
- * message - the message value
- * next - pointer to next message
- * prev - pointer to prev message
- */
+  // Get UID for user (also check if user exists)
+  struct passwd *pwd = getpwnam(username);
 
-typedef struct message_struct {
-    pid_node_t *recipients;
-    char *message;
-    struct message_struct *prev;
-    struct message_struct *next;
-} message_t;
+  if (pwd) {
+    message m;
+    m.m1_i1 = pwd->pw_uid;
+    m.m1_i2 = privileges;
 
-/* Mailbox
- * number_of_messages - current number of messages in the mailbox (limit is 16)
- * head - pointer to head of message linked list
- */
+    return(_syscall(PM_PROC_NR, PM_ADD_USER, &m));
+  }
 
-typedef struct {
-  int number_of_messages;
-  message_t *head;
-} mailbox_t;
-
-int create_mailbox();
-int init_msg_pid_list(message_t *m);
+  printf("Error: user does not exist.\n");
+  return ERROR;
+}
 
 int send_message(char *messageData, size_t messageLen, int *recipients, int recipientsLen)
 {

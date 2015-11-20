@@ -3,7 +3,7 @@
 # Copy files to appropriate location in Minix
 
 # Copy process manager's files
-pmFiles="mailbox.c proto.h table.c"
+pmFiles="mailbox.h mailbox.c proto.h table.c"
 for fl in $pmFiles; do
     cp $fl /usr/src/minix/servers/pm
 done

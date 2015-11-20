@@ -1,11 +1,63 @@
 /* File mailbox.c */
 /* Define system calls to the mailbox */
 
-#include "mailboxlib.h"
-#include <minix/syslib.h>
-#include "glo.h"
+#include "mailbox.h"
 
 static mailbox_t *mailbox;
+static uid_node_t *users;
+
+/* Project 3 */
+
+/* Initialize users list */
+int init_users(){
+
+  // Sentinel value
+  users = malloc(sizeof(uid_node_t));
+  users->uid = -1;
+
+  // add superuser to users list
+  uid_node_t *superuser = malloc(sizeof(uid_node_t));
+  superuser->privileges = 0b1111;
+  superuser->prev = users;
+  superuser->next = users;
+
+  users->next = superuser;
+  users->prev = superuser;
+
+  return OK;
+}
+
+/* Add a user to the user list
+ * Can be called only by the superuser
+ */
+int do_add_user() {
+
+  int uid, privileges;
+
+  uid = m_in.m1_i1;
+  privileges = m_in.m1_i2;
+
+  if (!users){
+    init_users();
+  }
+
+  // Add new user to the users list
+  uid_node_t *new_user = malloc(sizeof(uid_node_t));
+  new_user->uid = uid;
+  new_user->privileges = privileges;
+
+  new_user->next = users;
+  new_user->prev = users->prev;
+
+  users->prev->next = new_user;
+  users->prev = new_user;
+
+  printf("Mailbox: Added user with uid %d\n", new_user->uid);
+
+  return OK;
+}
+
+/* From Project 2 */
 
 /* Used for debugging purposes
  * Print all messages which are currently in the mailbox
@@ -39,8 +91,6 @@ int print_all_messages()
 
 	return 0;
 }
-
-
 
 /* Used to create a new mailbox */
 int create_mailbox(){
