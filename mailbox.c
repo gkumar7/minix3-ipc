@@ -7,15 +7,9 @@
 
 static mailbox_t *mailbox;
 
-/* Maybe we don't need this, but leave it for now */
-int stringToArray(char* stringListOfPids)
-{
-
-	return 0;
-}
-
-
-
+/* Used for debugging purposes
+ * Print all messages which are currently in the mailbox
+*/
 int print_all_messages()
 {
 
@@ -53,7 +47,7 @@ int create_mailbox(){
 	mailbox = malloc(sizeof(mailbox_t));
 	mailbox->head = malloc(sizeof(message_t));
 
-	// Sentinel
+	// Sentinel value
 	message_t *head = malloc(sizeof(message_t));
 	head->message = "HEAD";
 	head->prev = head;
@@ -69,6 +63,7 @@ int init_msg_pid_list(message_t *m) {
     m->recipients = malloc(sizeof(pid_node_t));
     m->recipients->prev = m->recipients;
 
+    // Sentinel value
     // Use negative -1 for head pid
     m->recipients->pid = -1;
     m->recipients->next = m->recipients;
@@ -111,10 +106,6 @@ int add_to_mailbox()
 	printf("Mailbox: New message received. Message content with %d bytes: %s\n", messageBytes, message);
 	printf("Mailbox: *stringRecipients is %s\n", stringRecipients);
 	printf("Mailbox: *recipientsStringLen is %d\n", recipientsStringLen);
-
-	//printf("Mailbox: recipientsString is %s\n", stringRecipients);
-
-	/* TODO: Function to take the pids in the string and insert them in the recipients array */
 
 	//If the mailbox doesn't exist, we create it first
 	if (!mailbox)
@@ -165,10 +156,7 @@ int add_to_mailbox()
 
 	  printf("Mailbox: Current amount of messages in mailbox: %d\n", mailbox->number_of_messages);
 
-	  print_all_messages();
-
-	  /*printf("Mailbox: Added message \"%s\" to mailbox\n", message);
-	  printf("Mailbox: Message length: %d\n", messageLen);*/
+	  /* print_all_messages(); */
 	}
 	else
 	{
@@ -179,7 +167,10 @@ int add_to_mailbox()
 	return OK;
 }
 
-
+/* Retrieve a process' messages from the mailbox
+ * Garbage collect a given message if all designated processes have received the message
+ * Deadlock can occur if the mailbox is full, and no process retrieves the messages from the mailbox
+ */
 int get_from_mailbox()
 {
     char *message;
@@ -233,7 +224,6 @@ int get_from_mailbox()
                     recipient_p->next->prev = recipient_p->prev;
                     pid_node_t *next_node = recipient_p->next;
                     pid_node_t *prev_node = recipient_p->prev;
-                    /**/
                     free(recipient_p);
 
                     // Test if the message has to be garbage collected
