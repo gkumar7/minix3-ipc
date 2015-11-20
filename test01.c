@@ -22,10 +22,6 @@ int main(int argc, char* argv[])
 	printf( "Enter your message (Max %d chars) : ", MAX_MESSAGE_LEN);
 	gets( message );
 
-	//char *message = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur in feugiat quam. Pellentesque eu gravida lacus. Phasellus enim tortor, malesuada ut lectus non, lobortis elementum lorem. Integer porttitor urna vitae elit imperdiet dignissim. Fusce sed elit id dolor cursus elementum. Nunc et congue leo. Donec ornare, nulla ac eleifend tincidunt, nulla tortor bibendum orci, nec cursus dolor velit et purus. Aliquam erat volutpat. Ut sagittis egestas gravida. Morbi mollis vestibulum eleifend. Nullam condimentum elit bibendum egestas fringilla. Suspendisse et felis in nunc interdum molestie. Phasellus hendrerit nisl ac purus malesuada, non tristique mi aliquam. Maecenas consectetur pellentesque nisi eu fermentum. Ut ornare dictum pharetra";
-
-    //Nulla tortor ex, hendrerit vel interdum nec, rutrum a ante. Donec luctus bibendum vulputate. Donec a ex porta massa aliquam pretium eu nec ligula. Quisque gravida, lorem ac rutrum semper, odio enim interdum nunc, quis rutrum mi orci non dolor. Sed at sem gravida, laoreet metus.";
-	//char *message = argv[1];
 	int recieversPid[argc - 1];
 	int i;
 
