@@ -8,7 +8,7 @@ int main(int argc, char* argv[])
 {
 
 
-	if (argc <= 1)
+	if (argc <= 1 || argc > 2)
 	{
 		printf ("Usage: %s PROCESS_PID\n", argv[0]);
 		return 0;
@@ -17,16 +17,16 @@ int main(int argc, char* argv[])
 	int processPid = atoi(argv[1]);
 	char destBuffer[MAX_MESSAGE_LEN];
 
-	printf("Test 02: Calling get_message\n");
+	printf("+Test: Calling get_message system call. Your PID is %d\n", processPid);
 
 	if (receive_message(destBuffer, sizeof(destBuffer), processPid) == OK)
 	{
-		printf("***The process has received a new message***\n");
-		printf("The message is: %s\n", destBuffer);
+		printf("+Test: The process has received a new message\n");
+		printf("*The message is: %s\n", destBuffer);
 	}
 	else
 	{
-		printf("There are no messages for this process\n");
+		printf("+Test: There are no messages for this process in the mailbox\n");
 	}
 
 	return 0;
