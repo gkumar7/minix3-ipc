@@ -3,6 +3,7 @@
 
 #include "mailbox.h"
 
+
 static mailbox_t *mailbox;
 static uid_node_t *users;
 

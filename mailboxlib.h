@@ -15,6 +15,7 @@
 #define ERROR -1
 
 
+
 int add_user(char *username, int privileges){
 
   // Get UID for user (also check if user exists)

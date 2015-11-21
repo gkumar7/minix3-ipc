@@ -9,6 +9,8 @@
 #define OK 0
 #define ERROR -1
 #define MAX_MESSAGE_LEN 1024
+#define SECURE 0
+#define PUBLIC 1
 
 /* UID LinkedList
  * uid: UID of a user
@@ -56,9 +58,18 @@ typedef struct message_struct {
  */
 
 typedef struct {
+  int owner;
   int number_of_messages;
+  int mailbox_type;
+  uid_node_t *send_access;
+  uid_node_t *receive_access;
   message_t *head;
 } mailbox_t;
+
+typedef struct {
+    int number_of_mailboxes;
+    mailbox_t *head;
+} mailbox_collection_t;
 
 int create_mailbox();
 int init_msg_pid_list(message_t *m);
