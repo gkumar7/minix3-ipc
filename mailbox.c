@@ -130,20 +130,30 @@ int init_msg_pid_list(message_t *m) {
 int add_to_mailbox()
 {
 	char* message;
-	char* stringRecipients;
+	//char* stringRecipients;
 	int messageLen;
-	int recipientsStringLen;
+	//int recipientsStringLen;
+  int subjectLen;
 
 	// If message size > MAX_MESSAGE_LEN return error
-	messageLen = m_in.m1_i1;
-	recipientsStringLen = m_in.m1_i2;
+	//messageLen = m_in.m1_i1;
+	//recipientsStringLen = m_in.m1_i2;
 
+  messageLen = strlen(m_in.m1_p1);
 
 	if (messageLen > MAX_MESSAGE_LEN)
 	{
 		printf("Error: received message size exceeds %d chars\n", MAX_MESSAGE_LEN);
 		return ERROR;
 	}
+
+  subjectLen = strlen(m_in.m1_p2);
+
+  if (subjectLen > MAX_SUBJECT_LEN)
+  {
+    printf("Error: received subject size exceeds %d chars\n", MAX_SUBJECT_LEN);
+    return ERROR;
+  }
 
 	int messageBytes = messageLen * sizeof(char);
 	int recipientsStringBytes = recipientsStringLen * sizeof(char);

@@ -9,6 +9,7 @@
 #define OK 0
 #define ERROR -1
 #define MAX_MESSAGE_LEN 1024
+#define MAX_SUBJECT_LEN 140
 #define SECURE 0
 #define PUBLIC 1
 

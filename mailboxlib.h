@@ -33,10 +33,15 @@ int add_user(char *username, int privileges){
   return ERROR;
 }
 
-int send_message(char *messageData, size_t messageLen, int *recipients, int recipientsLen)
+int send_message(char *mailbox_name, 
+                 char *message_subject,
+                 char *message_data) 
+                 //size_t messageLen, 
+                 //int *recipients, 
+                 //int recipientsLen)
 {
-	message m;
-	int i;
+	
+	/*int i;
 	//char recipientsString[128];  // 6 [5 from pid + 1 from separator] * 16, will be always lower than 128
 	char *recipientsString;
 
@@ -53,11 +58,17 @@ int send_message(char *messageData, size_t messageLen, int *recipients, int reci
 	//snprintf(recipientsString, 128, "%d", recipients[recipientsLen-1]);
 
 	printf("User: Mapping message %s to pids %s\n", messageData, recipientsString);
-
-	m.m1_p1 = messageData;
+	*/
+	/*m.m1_p1 = messageData;
 	m.m1_p2 = recipientsString;
 	m.m1_i1 = (int) messageLen;
-	m.m1_i2 = recipientsStringLen;
+	m.m1_i2 = recipientsStringLen;*/
+	
+	message m;
+
+	m.m1_p1 = message_data;
+	m.m1_p2 = message_subject;
+	m.m1_p3 = mailbox_name;
 
 	return(_syscall(PM_PROC_NR, PM_DEPOSIT, &m));
 }
