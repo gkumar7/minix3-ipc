@@ -4,8 +4,11 @@
 #include "mailbox.h"
 
 
-static mailbox_t *mailbox;
+static mailbox_collection_t *mailbox_collection;
 static uid_node_t *users;
+
+/* Need to remove this */
+static mailbox_t *mailbox;
 
 /* Project 3 */
 
