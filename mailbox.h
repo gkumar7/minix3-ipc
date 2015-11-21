@@ -48,6 +48,7 @@ typedef struct pid_node {
 typedef struct message_struct {
     pid_node_t *recipients;
     char *message;
+    char *subject;
     struct message_struct *prev;
     struct message_struct *next;
 } message_t;
@@ -61,6 +62,7 @@ typedef struct {
   int owner;
   int number_of_messages;
   int mailbox_type;
+  char *mailbox_name;
   uid_node_t *send_access;
   uid_node_t *receive_access;
   message_t *head;
