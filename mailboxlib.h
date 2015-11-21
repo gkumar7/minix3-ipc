@@ -10,10 +10,10 @@
 #include <lib.h>
 #include <string.h>
 #include <pwd.h>
+#include <unistd.h>
 
 #define OK 0
 #define ERROR -1
-
 
 
 int add_user(char *username, int privileges){
@@ -32,6 +32,21 @@ int add_user(char *username, int privileges){
   printf("Error: user does not exist.\n");
   return ERROR;
 }
+
+/* Add a new mailbox to the collection
+ * mailbox_name - name of the mailbox
+ * send_access - space delimited string of uids
+ * receive_access - space delimited string of uids
+ */
+int add_mailbox(char *mailbox_name, char *send_access, char *receive_access){
+
+  message m;
+
+  m.m1_p1 = mailbox_name;
+  return(_syscall(PM_PROC_NR, PM_ADD_MAILBOX, &m));
+/*   int uid = getuid(); */
+}
+
 
 int send_message(char *mailbox_name, 
                  char *message_subject,
