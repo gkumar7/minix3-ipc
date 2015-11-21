@@ -66,29 +66,27 @@ int do_add_user() {
  */
 int do_add_mailbox(){
 
-  char *mailbox_name, *send_access, *receive_access;
+  char *mailbox_name, *send_access, *receive_access, *send_receive_lens;
 
-  /* Trying this: prints incorrect value - m_in.m1_p1 is a virtual address */
-  printf("Size of mailbox_name: %d", strlen(m_in.m1_p1));
+  int uid = m_in.m1_i1;
+  int mailbox_name_len = m_in.m1_i2;
+  int send_receive_lens_len = m_in.m1_i3;
+
+  int mailbox_name_bytes = mailbox_name_len * sizeof(char);
+
+  int send_receive_bytes = send_receive_lens_len * sizeof(char);
+
+  mailbox_name = malloc(mailbox_name_bytes);
+  send_receive_lens = malloc(send_receive_bytes);
+
+  sys_datacopy(who_e, (vir_bytes)m_in.m1_p1, SELF, (vir_bytes)mailbox_name, mailbox_name_bytes);
+
+  sys_datacopy(who_e, (vir_bytes)m_in.m1_p4, SELF, (vir_bytes)send_receive_lens, send_receive_bytes);
+
+  printf("Mailbox name is: %s\n", mailbox_name);
+  printf("Send_receive number of bytes: %s\n", send_receive_lens);
 
   return OK;
-  /* int uid = (int) m_in.m1_ull1; */
-  /* int mailbox_name_len = m_in.m1_i1; */
-  /* int send_access_len = m_in.m1_i2; */
-  /* int receive_access_len = m_in.m1_i3; */
-
-  /* int mailbox_name_bytes = mailbox_name_len * sizeof(char); */
-  /* int send_access_bytes = send_access_len * sizeof(char); */
-  /* int receive_access_bytes = receive_access_len * sizeof(char); */
-
-  /* mailbox_name = malloc(mailbox_name_bytes); */
-  /* send_access = malloc(send_access_bytes); */
-  /* receive_access = malloc(receive_access_bytes); */
-
-  /* sys_datacopy(who_e, (vir_bytes)m_in.m1_p1, SELF, (vir_bytes)mailbox_name, mailbox_name_bytes); */
-  /* sys_datacopy(who_e, (vir_bytes)m_in.m1_p2, SELF, (vir_bytes)send_access, send_access_bytes); */
-  /* sys_datacopy(who_e, (vir_bytes)m_in.m1_p3, SELF, (vir_bytes)receive_access, receive_access_bytes); */
-
 }
 
 /* From Project 2 */
