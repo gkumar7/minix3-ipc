@@ -3,7 +3,6 @@
 
 #include "mailbox.h"
 
-
 static mailbox_collection_t *mailbox_collection;
 static uid_node_t *users;
 
@@ -59,6 +58,37 @@ int do_add_user() {
   printf("Mailbox: Added user with uid %d\n", new_user->uid);
 
   return OK;
+}
+
+/* Create a new mailbox
+ * Check uid in users list
+ * Check user's privilege
+ */
+int do_add_mailbox(){
+
+  char *mailbox_name, *send_access, *receive_access;
+
+  /* Trying this: prints incorrect value - m_in.m1_p1 is a virtual address */
+  printf("Size of mailbox_name: %d", strlen(m_in.m1_p1));
+
+  return OK;
+  /* int uid = (int) m_in.m1_ull1; */
+  /* int mailbox_name_len = m_in.m1_i1; */
+  /* int send_access_len = m_in.m1_i2; */
+  /* int receive_access_len = m_in.m1_i3; */
+
+  /* int mailbox_name_bytes = mailbox_name_len * sizeof(char); */
+  /* int send_access_bytes = send_access_len * sizeof(char); */
+  /* int receive_access_bytes = receive_access_len * sizeof(char); */
+
+  /* mailbox_name = malloc(mailbox_name_bytes); */
+  /* send_access = malloc(send_access_bytes); */
+  /* receive_access = malloc(receive_access_bytes); */
+
+  /* sys_datacopy(who_e, (vir_bytes)m_in.m1_p1, SELF, (vir_bytes)mailbox_name, mailbox_name_bytes); */
+  /* sys_datacopy(who_e, (vir_bytes)m_in.m1_p2, SELF, (vir_bytes)send_access, send_access_bytes); */
+  /* sys_datacopy(who_e, (vir_bytes)m_in.m1_p3, SELF, (vir_bytes)receive_access, receive_access_bytes); */
+
 }
 
 /* From Project 2 */

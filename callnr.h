@@ -62,9 +62,10 @@
 #define PM_GETPROCNR		(PM_BASE + 46)
 #define PM_GETSYSINFO		(PM_BASE + 47)
 #define PM_DEPOSIT              (PM_BASE + 48) //add_to_mailbox
-#define PM_ADD_USER                (PM_BASE + 49) //add user to user list
+#define PM_ADD_USER             (PM_BASE + 49) //add user to user list
+#define PM_ADD_MAILBOX          (PM_BASE + 50) //add mailbox to mailbox_collection
 
-#define NR_PM_CALLS		50	/* highest number from base plus one */
+#define NR_PM_CALLS		51	/* highest number from base plus one */
 
 /*===========================================================================*
  *				Calls to VFS				     *
