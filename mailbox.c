@@ -30,6 +30,18 @@ int init_users(){
   return OK;
 }
 
+int userExists(int uid) {
+  uid_node_t *head = users->next;
+  while (head->uid != -1){
+    if (head->uid == uid) {
+      return 1;
+    }
+
+    head = head->next;
+  }
+  return 0;
+}
+
 /* Add a user to the user list
  * Can be called only by the superuser
  */
@@ -42,6 +54,12 @@ int do_add_user() {
 
   if (!users){
     init_users();
+  }
+
+  // Check if user already exists
+  if (userExists(uid)) {
+    printf("Mailbox: The user with uid %d already exists.\n", uid);
+    return ERROR;
   }
 
   // Add new user to the users list
@@ -60,15 +78,129 @@ int do_add_user() {
   return OK;
 }
 
+/* Create sentinel mailbox if none exists
+ * Check if the mailbox with the given name already exists
+ */
+
+int mailboxExists(char *mailbox_name) {
+  // Empty mailbox collection
+  if (!mailbox_collection) {
+    mailbox_collection = malloc(sizeof(mailbox_collection_t));
+    mailbox_collection->number_of_mailboxes = 0;
+
+    // Sentinel mailbox
+    mailbox_t *sentinel = malloc(sizeof(mailbox_t));
+    sentinel->mailbox_name = "HEAD";
+
+    sentinel->prev = sentinel;
+    sentinel->next = sentinel;
+
+    mailbox_collection->head = sentinel;
+    return 0;
+  }
+
+  mailbox_t *head = mailbox_collection->head->next;
+  while (strcmp(head->mailbox_name, "HEAD") != 0) {
+    if (strcmp(head->mailbox_name, mailbox_name) == 0){
+      return 1;
+    }
+
+    head = head->next;
+  }
+
+  return 0;
+}
+
+/* Check to make sure user has correct privileges to create the mailbox */
+int create_mailbox_privileges(int uid){
+  uid_node_t *head = users->next;
+
+  while (head->uid != -1){
+    if (head->uid == uid){
+      if (head->privileges == 0b1111 || head->privileges == 0b1011){
+	return 1;
+      }
+    }
+
+    head = head->next;
+  }
+
+  // User does not exist or does not have correct privileges
+  return 0;
+}
+
+int init_uid_access_list(uid_node_t *access_list) {
+  // Sentinel value
+  access_list = malloc(sizeof(uid_node_t));
+  access_list->uid = -1;
+
+  access_list->prev = access_list;
+  access_list->next = access_list;
+
+  return OK;
+}
+
+int get_privileges_for_user(int uid) {
+  uid_node_t *head = users->next;
+  while (head->uid != -1){
+    if (head->uid == uid) {
+      return head->privileges;
+    }
+
+    head = head->next;
+  }
+  return ERROR;
+}
+
+int create_list(char *access_list_str, uid_node_t *access_list) {
+  if (!access_list){
+    init_uid_access_list(access_list);
+  }
+
+  const char delim[2] = " ";
+  char *access_p = strtok(access_list_str, delim);
+  int uid = atoi(access_p);
+
+  while (access_p != NULL){
+    uid_node_t *new_uid = malloc(sizeof(uid_node_t));
+    int privileges = get_privileges_for_user(uid);
+    if (privileges == ERROR) {
+      // Skip this user
+      printf("No user found for user id %d\n", uid);
+    }
+    else {
+      // If privileges were found (user exists)
+      new_uid->privileges = privileges;
+
+      new_uid->next = access_list;
+      new_uid->prev = access_list->prev;
+
+      access_list->prev->next = new_uid;
+      access_list->prev = new_uid;
+
+      access_p = strtok(NULL, delim);
+    }
+  }
+  return OK;
+}
+
 /* Create a new mailbox
  * Check uid in users list
  * Check user's privilege
+ * send_receive_lens = "mailbox_type send_len receive_len"
  */
 int do_add_mailbox(){
 
   char *mailbox_name, *send_access, *receive_access, *send_receive_lens;
 
   int uid = m_in.m1_i1;
+
+  if (!create_mailbox_privileges(uid)){
+    printf("The user with uid %d does not have the appropriate privileges to create a mailbox.\n", uid);
+    return ERROR;
+  }
+
+  // Correct privileges
   int mailbox_name_len = m_in.m1_i2;
   int send_receive_lens_len = m_in.m1_i3;
 
@@ -85,6 +217,56 @@ int do_add_mailbox(){
 
   printf("Mailbox name is: %s\n", mailbox_name);
   printf("Send_receive number of bytes: %s\n", send_receive_lens);
+
+  // Copy send_access & receive_access strings
+  const char delim[2] = " ";
+  int mailbox_type = atoi(strtok(send_receive_lens, delim));
+  int send_access_bytes = atoi(strtok(NULL, delim)) * sizeof(char);
+  int receive_access_bytes = atoi(strtok(NULL, delim)) * sizeof(char);
+
+  send_access = malloc(send_access_bytes);
+  receive_access = malloc(receive_access_bytes);
+
+  sys_datacopy(who_e, (vir_bytes)m_in.m1_p2, SELF, (vir_bytes)send_access, send_access_bytes);
+  sys_datacopy(who_e, (vir_bytes)m_in.m1_p3, SELF, (vir_bytes)receive_access, receive_access_bytes);
+
+  printf("The mailbox_type is: %d\n", mailbox_type);
+  printf("The value of send_access is: %s\n", send_access);
+  printf("The value of receive_access is: %s\n", receive_access);
+
+
+  // Check if mailbox already exists
+  if (mailboxExists(mailbox_name)) {
+    printf("Error: mailbox %s already exists.", mailbox_name);
+    return ERROR;
+  }
+
+  // Create a new mailbox
+  // Assumes that the uid's that the user provides are valid
+
+  mailbox_t *new_mailbox = malloc(sizeof(mailbox_t));
+  new_mailbox->owner = uid;
+  new_mailbox->number_of_messages = 0;
+  new_mailbox->mailbox_type = mailbox_type;
+  new_mailbox->mailbox_name = mailbox_name;
+
+  // Add send and receive access lists
+  create_list(send_access, new_mailbox->send_access);
+  create_list(receive_access, new_mailbox->receive_access);
+
+  // Sentinel message for mailbox
+  message_t *head = malloc(sizeof(message_t));
+  head->message = "HEAD";
+  head->prev = head;
+  head->next = head;
+
+  new_mailbox->head = head;
+
+  new_mailbox->next = mailbox_collection->head;
+  new_mailbox->prev = mailbox_collection->head->prev;
+
+  mailbox_collection->head->prev->next = new_mailbox;
+  mailbox_collection->head->prev = new_mailbox;
 
   return OK;
 }

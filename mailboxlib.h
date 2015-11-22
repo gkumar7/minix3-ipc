@@ -34,11 +34,12 @@ int add_user(char *username, int privileges){
 }
 
 /* Add a new mailbox to the collection
+ * mailbox_type - 0 or 1 (secure or public)
  * mailbox_name - name of the mailbox
  * send_access - space delimited string of uids
  * receive_access - space delimited string of uids
  */
-int add_mailbox(char *mailbox_name, char *send_access, char *receive_access){
+int add_mailbox(int mailbox_type, char *mailbox_name, char *send_access, char *receive_access){
 
   message m;
 
@@ -52,13 +53,18 @@ int add_mailbox(char *mailbox_name, char *send_access, char *receive_access){
   int send_access_len = strlen(send_access);
   int receive_access_len = strlen(receive_access);
 
+  char *mailbox_type_buf = malloc(snprintf(NULL, 0, "%d", mailbox_type) + 1);
+  snprintf(mailbox_type_buf, "%d", mailbox_type);
+
   // Concatenate lengths of send and receive into a char *
   char *buf1 = malloc(snprintf(NULL, 0, "%d", send_access_len) + 1);
   char *buf2 = malloc(snprintf(NULL, 0, "%d", receive_access_len) + 1);
   sprintf(buf1, "%d", send_access_len);
   sprintf(buf2, "%d", receive_access_len);
 
-  char *send_receive_lens = strcat(buf1, ";");
+  char *send_receive_lens = strcat(mailbox_type_buf, " ");
+  send_receive_lens = strcat(send_receive_lens, buf1);
+  send_receive_lens = strcat(send_receive_lens, " ");
   send_receive_lens = strcat(send_receive_lens, buf2);
 
   m.m1_i3 = strlen(send_receive_lens);

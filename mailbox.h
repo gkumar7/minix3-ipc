@@ -58,7 +58,7 @@ typedef struct message_struct {
  * head - pointer to head of message linked list
  */
 
-typedef struct {
+typedef struct mailbox_struct {
   int owner;
   int number_of_messages;
   int mailbox_type;
@@ -66,6 +66,8 @@ typedef struct {
   uid_node_t *send_access;
   uid_node_t *receive_access;
   message_t *head;
+  struct mailbox_struct *prev;
+  struct mailbox_struct *next;
 } mailbox_t;
 
 typedef struct {
