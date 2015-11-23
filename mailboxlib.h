@@ -73,12 +73,12 @@ int send_message(char *messageData, size_t messageLen, int *recipients, int reci
 	}
 	//snprintf(recipientsString, 128, "%d", recipients[recipientsLen-1]);
 
-	printf("User: Mapping message %s to pids %s\n", messageData, recipientsString);
+	//printf("User: Mapping message %s to pids %s\n", messageData, recipientsString);
 
 	m.m1_p1 = messageData;
 	m.m1_p2 = recipientsString;
-	m.m1_i1 = (int) messageLen;
-	m.m1_i2 = recipientsStringLen;
+	m.m1_i1 = (int) messageLen + 1;
+	m.m1_i2 = recipientsStringLen + 1;
 
 	return(_syscall(PM_PROC_NR, PM_DEPOSIT, &m));
 }
