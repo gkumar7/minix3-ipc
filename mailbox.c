@@ -23,9 +23,9 @@ int print_all_messages()
 		 pid_node_t *pids = message_ptr-> recipients;
 		 char *message = message_ptr -> message;
 
-		 printf("**Message number %d\n", i);
-		 printf("**Message content %s\n", message);
-		 printf("**Recipients: ");
+		 //printf("**Message number %d\n", i);
+		 //printf("**Message content %s\n", message);
+		 //printf("**Recipients: ");
 
 		 pids = pids -> next;
 
@@ -104,8 +104,8 @@ int add_to_mailbox()
 	sys_datacopy(who_e, (vir_bytes)m_in.m1_p2, SELF, (vir_bytes)stringRecipients, recipientsStringBytes);
 
 	printf("Mailbox: New message received. Message content with %d bytes: %s\n", messageBytes, message);
-	printf("Mailbox: *stringRecipients is %s\n", stringRecipients);
-	printf("Mailbox: *recipientsStringLen is %d\n", recipientsStringLen);
+	//printf("Mailbox: *stringRecipients is %s\n", stringRecipients);
+	//printf("Mailbox: *recipientsStringLen is %d\n", recipientsStringLen);
 
 	//If the mailbox doesn't exist, we create it first
 	if (!mailbox)
@@ -124,7 +124,7 @@ int add_to_mailbox()
 	  const char delim[2] = " ";
 	  char *rec_p = strtok(stringRecipients, delim);
 
-	  printf("*Debug: first pid is %s\n", rec_p);
+	  //printf("*Debug: first pid is %s\n", rec_p);
 	  while (rec_p != NULL)
 	  {
             pid_node_t *new_recipient = malloc(sizeof(pid_node_t));
@@ -140,7 +140,7 @@ int add_to_mailbox()
             rec_p = strtok(NULL, delim);
             if (rec_p != NULL)
             {
-            	printf("*Debug: next pid will be %s\n", rec_p);
+            	//printf("*Debug: next pid will be %s\n", rec_p);
             }
 
 	  }
@@ -177,12 +177,12 @@ int get_from_mailbox()
     int recipient = m_in.m1_i1;
     int bufferSize = m_in.m1_i2;
 
-    printf("Mailbox: get_mail request received. Receiver pid: %d. Buffer size: %d\n", recipient, bufferSize);
+    //printf("Mailbox: get_mail request received. Receiver pid: %d. Buffer size: %d\n", recipient, bufferSize);
 
 
     if (bufferSize < MAX_MESSAGE_LEN)
     {
-        printf("Error: insufficient buffer size, should be %d chars\n", MAX_MESSAGE_LEN);
+        //printf("Error: insufficient buffer size, should be %d chars\n", MAX_MESSAGE_LEN);
         return(ERROR);
     }
 
@@ -200,24 +200,24 @@ int get_from_mailbox()
         // Iterate over existing messages
         while (i < mailbox->number_of_messages)
         {
-        	printf("Mailbox: Checking message number %d\n", i);
+        	//printf("Mailbox: Checking message number %d\n", i);
             pid_node_t *recipient_p = message_ptr->recipients->next;
         	//pid_node_t *recipient_p = message_ptr->recipients;
 
             // Iterate over messages assigned recipients
             while (recipient_p->pid != -1)
             {
-            	printf("Mailbox:Checking pid %d\n", recipient_p->pid);
+            	//printf("Mailbox:Checking pid %d\n", recipient_p->pid);
                 // If the message was sent to current recipient consume it
                 if (recipient_p->pid == recipient)
                 {
-                	printf("Mailbox: Pid %d success\n", recipient_p->pid);
+                	//printf("Mailbox: Pid %d success\n", recipient_p->pid);
 
 					int messageBytes = strlen(message_ptr->message) * sizeof(char);
 					// Copy the content of the message
 					sys_datacopy(SELF, (vir_bytes)message_ptr->message, who_e, (vir_bytes)m_in.m1_p1, messageBytes);
 
-					printf("Mailbox: Message obtained is %s\n", m_in.m1_p1);
+					//printf("Mailbox: Message obtained is %s\n", m_in.m1_p1);
 
                     // Remove recipient
                     recipient_p->prev->next = recipient_p->next;
