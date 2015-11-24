@@ -6,6 +6,7 @@
 #include "glo.h"
 
 static mailbox_t *mailbox;
+static int mutex;
 
 /* Used for debugging purposes
  * Print all messages which are currently in the mailbox
@@ -56,6 +57,8 @@ int create_mailbox(){
 	mailbox->head = head;
 	mailbox->number_of_messages = 0;
 
+	mutex = 0;
+
 	return OK;
 }
 
@@ -78,6 +81,8 @@ int init_msg_pid_list(message_t *m) {
  */
 int add_to_mailbox()
 {
+	while (mutex==1);
+	mutex = 1; 
 	char* message;
 	char* stringRecipients;
 	int messageLen;
@@ -91,6 +96,7 @@ int add_to_mailbox()
 	if (messageLen > MAX_MESSAGE_LEN)
 	{
 		printf("Error: received message size exceeds %d chars\n", MAX_MESSAGE_LEN);
+		mutex = 0;
 		return ERROR;
 	}
 
@@ -103,7 +109,7 @@ int add_to_mailbox()
 	sys_datacopy(who_e, (vir_bytes)m_in.m1_p1, SELF, (vir_bytes)message, messageBytes);
 	sys_datacopy(who_e, (vir_bytes)m_in.m1_p2, SELF, (vir_bytes)stringRecipients, recipientsStringBytes);
 
-	printf("Mailbox: New message received. Message content with %d bytes: %s\n", messageBytes, message);
+	printf("Mailbox: New message sent. Message content with %d bytes: %s\n", messageBytes, message);
 	//printf("Mailbox: *stringRecipients is %s\n", stringRecipients);
 	//printf("Mailbox: *recipientsStringLen is %d\n", recipientsStringLen);
 
@@ -161,9 +167,10 @@ int add_to_mailbox()
 	else
 	{
 		printf("Error: mailbox is full\n");
+		mutex = 0;
 		return ERROR;
 	}
-
+	mutex = 0;
 	return OK;
 }
 
@@ -173,6 +180,9 @@ int add_to_mailbox()
  */
 int get_from_mailbox()
 {
+	while (mutex==1);
+	mutex = 1; 
+
     char *message;
     int recipient = m_in.m1_i1;
     int bufferSize = m_in.m1_i2;
@@ -183,6 +193,7 @@ int get_from_mailbox()
     if (bufferSize < MAX_MESSAGE_LEN)
     {
         //printf("Error: insufficient buffer size, should be %d chars\n", MAX_MESSAGE_LEN);
+        mutex = 0;
         return(ERROR);
     }
 
@@ -190,6 +201,7 @@ int get_from_mailbox()
     if (!mailbox || mailbox->number_of_messages == 0)
     {
         printf("Error: mailbox is empty or has not been created\n");
+        mutex = 0;
         return ERROR;
     }
     else
@@ -235,7 +247,7 @@ int get_from_mailbox()
                         free(message_ptr);
                         mailbox->number_of_messages--;
                     }
-
+                    mutex = 0;
                     return OK;
                 }
                 //Otherwise increment recipient's pointer
@@ -250,6 +262,6 @@ int get_from_mailbox()
         }
     }
     // In case of not find a message for the recipient return error
-
+    mutex = 0;
     return ERROR;
 }
