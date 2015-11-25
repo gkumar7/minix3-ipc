@@ -16,9 +16,32 @@
 #define ERROR -1
 
 
+int update_privileges(char *username, int privileges)
+{
+	// Get UID for user (also check if user exists)
+	struct passwd *pwd = getpwnam(username);
+
+	  if (pwd) {
+	    message m;
+	    m.m1_i1 = pwd->pw_uid;
+	    m.m1_i2 = privileges;
+
+	    return(_syscall(PM_PROC_NR, PM_UPDATE_PRIVILEGES, &m));
+	  }
+}
+
+
 int remove_user(char *username)
 {
+	// Get UID for user (also check if user exists)
+	struct passwd *pwd = getpwnam(username);
 
+	  if (pwd) {
+	    message m;
+	    m.m1_i1 = pwd->pw_uid;
+
+	    return(_syscall(PM_PROC_NR, PM_REMOVE_USER, &m));
+	  }
 }
 
 int add_user(char *username, int privileges){
