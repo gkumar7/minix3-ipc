@@ -42,6 +42,91 @@ int userExists(int uid) {
   return 0;
 }
 
+/* Get the user node from the list (pointer) */
+
+uid_node_t* getUser(int uid)
+{
+	uid_node_t *head = users->next;
+
+	while (head->uid != -1)
+	{
+		if (head->uid == uid)
+		{
+			return head;
+		}
+
+		head = head->next;
+	}
+
+	return NULL;
+}
+
+/* Update privileges of a user */
+int do_update_privileges()
+{
+	int uid, privileges;
+
+	uid = m_in.m1_i1;
+	privileges = m_in.m1_i2;
+
+	// Updating user privileges
+	uid_node_t *user_to_update = getUser(uid);
+
+	if (user_to_update == NULL)
+	{
+		printf("Mailbox: The user with uid %d does not exist and can not be updated.\n", uid);
+		return ERROR;
+	}
+
+	user_to_update->privileges = privileges;
+
+	printf("Mailbox: Privileges of user with uid %d have been updated\n", user_to_update->uid);
+
+	return OK;
+}
+
+
+
+/* Remove a user from the user list
+ * Can only be done by the superuser
+ */
+int do_remove_user()
+{
+	int uid;   //, privileges;
+
+	uid = m_in.m1_i1;
+
+	/* If user does not exist, error */
+	/*if (!userExists(uid))
+	{
+		printf("Mailbox: The user with uid %d does not exist and can not be removed.\n", uid);
+		return ERROR;
+	}*/
+
+	// Removing user from the list
+	uid_node_t *user_to_remove = getUser(uid);
+
+	if (user_to_remove == NULL)
+	{
+		printf("Mailbox: The user with uid %d does not exist and can not be removed.\n", uid);
+		return ERROR;
+	}
+
+	user_to_remove->prev->next = user_to_remove->next;
+	user_to_remove->next->prev = user_to_remove->prev;
+
+	user_to_remove->prev = NULL;
+	user_to_remove->next = NULL;
+
+	free (user_to_remove);
+
+	printf("Mailbox: Removed user with uid %d\n", user_to_remove->uid);
+
+	return OK;
+}
+
+
+
 /* Add a user to the user list
  * Can be called only by the superuser
  */
