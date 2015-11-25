@@ -161,81 +161,40 @@ int init_msg_pid_list(message_t *m) {
 int add_to_mailbox()
 {
 	char* message;
-	//char* stringRecipients;
+  char* subject;
+  char* mailboxName;
+
 	int messageLen;
-	//int recipientsStringLen;
   int subjectLen;
+  int mailboxNameLen;
 
-	// If message size > MAX_MESSAGE_LEN return error
-	//messageLen = m_in.m1_i1;
-	//recipientsStringLen = m_in.m1_i2;
-
-  messageLen = strlen(m_in.m1_p1);
-
-	if (messageLen > MAX_MESSAGE_LEN)
-	{
-		printf("Error: received message size exceeds %d chars\n", MAX_MESSAGE_LEN);
-		return ERROR;
-	}
-
-  subjectLen = strlen(m_in.m1_p2);
-
-  if (subjectLen > MAX_SUBJECT_LEN)
-  {
-    printf("Error: received subject size exceeds %d chars\n", MAX_SUBJECT_LEN);
-    return ERROR;
-  }
+	messageLen = m_in.m1_i1;
+  subjectLen = m_in.m1_i2;
+  mailboxNameLen = m_in.m1_i3;
 
 	int messageBytes = messageLen * sizeof(char);
-	int recipientsStringBytes = recipientsStringLen * sizeof(char);
-
 	message = malloc(messageBytes);
-	stringRecipients = malloc(recipientsStringBytes);
-
 	sys_datacopy(who_e, (vir_bytes)m_in.m1_p1, SELF, (vir_bytes)message, messageBytes);
-	sys_datacopy(who_e, (vir_bytes)m_in.m1_p2, SELF, (vir_bytes)stringRecipients, recipientsStringBytes);
 
-	printf("Mailbox: New message received. Message content with %d bytes: %s\n", messageBytes, message);
-	printf("Mailbox: *stringRecipients is %s\n", stringRecipients);
-	printf("Mailbox: *recipientsStringLen is %d\n", recipientsStringLen);
+  int subjectBytes = subjectLen * sizeof(char);
+  subject = malloc(subjectBytes);
+  sys_datacopy(who_e, (vir_bytes)m_in.m1_p2, SELF, (vir_bytes)subject, subjectBytes);
 
-	//If the mailbox doesn't exist, we create it first
-	if (!mailbox)
-	{
-		create_mailbox();
-	}
+	printf("Mailbox: New message received. Subject with %d bytes: %s,message content with %d bytes: %s\n",subjectBytes,subject,messageBytes, message);
+
+  int mailboxNameBytes = mailboxNameLen * sizeof(char);
+  mailboxName = malloc(mailboxNameBytes);
+  sys_datacopy(who_e, (vir_bytes)m_in.m1_p3, SELF, (vir_bytes)mailboxName, mailboxNameBytes);
+
+  // TODO: search mailbox by name, if it does not exist -> Error
+  // store mailbox pointer in mailbox var
+
+  //TODO: check permissions
 
 	if (mailbox->number_of_messages < MAX_MESSAGE_COUNT)
 	{
 	  message_t *new_message = malloc(sizeof(message_t));
 	  new_message->message = message;
-
-	  // Create a head node for the recipients linked list
-	  init_msg_pid_list(new_message);
-
-	  const char delim[2] = " ";
-	  char *rec_p = strtok(stringRecipients, delim);
-
-	  printf("*Debug: first pid is %s\n", rec_p);
-	  while (rec_p != NULL)
-	  {
-            pid_node_t *new_recipient = malloc(sizeof(pid_node_t));
-
-            new_recipient->pid = atoi(rec_p);
-
-            new_recipient->next = new_message->recipients;
-            new_recipient->prev = new_message->recipients->prev;
-
-            new_message->recipients->prev->next = new_recipient;
-            new_message->recipients->prev = new_recipient;
-
-            rec_p = strtok(NULL, delim);
-            if (rec_p != NULL)
-            {
-            	printf("*Debug: next pid will be %s\n", rec_p);
-            }
-
-	  }
 
 	  new_message->next = mailbox->head;
 	  new_message->prev = mailbox->head->prev;
@@ -245,10 +204,7 @@ int add_to_mailbox()
 
 	  mailbox->number_of_messages += 1;
 
-
 	  printf("Mailbox: Current amount of messages in mailbox: %d\n", mailbox->number_of_messages);
-
-	  /* print_all_messages(); */
 	}
 	else
 	{
