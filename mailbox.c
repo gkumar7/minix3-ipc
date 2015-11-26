@@ -368,15 +368,52 @@ int add_to_mailbox()
   mailboxName = malloc(mailboxNameBytes);
   sys_datacopy(who_e, (vir_bytes)m_in.m1_p3, SELF, (vir_bytes)mailboxName, mailboxNameBytes);
 
-  // TODO: search mailbox by name, if it does not exist -> Error
+  // search mailbox by name, if it does not exist -> Error
   // store mailbox pointer in mailbox var
 
-  //TODO: check permissions
+  mailbox_t *mailbox = mailbox_collection->head;
+  int found = 0;
+  do {
+    if (!strcmp(mailboxName,mailbox->mailbox_name)) {
+      found = 1;
+    } else {
+      mailbox = mailbox->next;
+    }
+  } while (!found && strcmp(mailbox_collection->head->mailbox_name,mailbox->mailbox_name));
+
+  if (!found) {
+    printf("Error: not found mailbox with given name\n");
+    return ERROR;
+  }
+  
+  // Permission to write?
+
+  int uid = (int) m_in.m1_ull1;
+  int in_permission_list=0;
+  
+  uid_node_t *uid_p = mailbox->send_access->next;
+            
+  while ((uid_p->uid != -1) && !in_permission_list)
+  {
+    if (uid == uid_p->uid) {
+      in_permission_list=1;
+    }
+    uid_p = uid_p->next;
+  }
+
+  int permission = ((uid==0) || ((mailbox->mailbox_type==SECURE)&&in_permission_list)|| ((mailbox->mailbox_type==PUBLIC)&&!in_permission_list)) ? 1 : 0;
+
+  if (!permission) {
+    printf("The user is not allowed to write in the specified mailbox\n");
+    return ERROR;
+  }
 
 	if (mailbox->number_of_messages < MAX_MESSAGE_COUNT)
 	{
 	  message_t *new_message = malloc(sizeof(message_t));
-	  new_message->message = message;
+	  
+    new_message->message = message;
+    new_message->subject = subject;
 
 	  new_message->next = mailbox->head;
 	  new_message->prev = mailbox->head->prev;
@@ -407,7 +444,7 @@ int get_from_mailbox()
     int recipient = m_in.m1_i1;
     int bufferSize = m_in.m1_i2;
 
-    printf("Mailbox: get_mail request received. Receiver pid: %d. Buffer size: %d\n", recipient, bufferSize);
+    printf("Mailbox: get_mail request received from recipient %d. Buffer size: %d\n", recipient, bufferSize);
 
 
     if (bufferSize < MAX_MESSAGE_LEN)
@@ -415,70 +452,82 @@ int get_from_mailbox()
         printf("Error: insufficient buffer size, should be %d chars\n", MAX_MESSAGE_LEN);
         return(ERROR);
     }
+    //Look for messages in mailboxes
+    mailbox_t *mailbox = mailbox_collection->head;
+    int found = 0;
+    
+    int uid = m_in.m1_i3;
 
-    // Return error if there are no messages in the mailbox
-    if (!mailbox || mailbox->number_of_messages == 0)
-    {
-        printf("Error: mailbox is empty or has not been created\n");
-        return ERROR;
-    }
-    else
-    {
-        int i = 0;
-        message_t *message_ptr = mailbox->head->next;
-
-        // Iterate over existing messages
-        while (i < mailbox->number_of_messages)
-        {
-        	printf("Mailbox: Checking message number %d\n", i);
-            pid_node_t *recipient_p = message_ptr->recipients->next;
-        	//pid_node_t *recipient_p = message_ptr->recipients;
-
-            // Iterate over messages assigned recipients
-            while (recipient_p->pid != -1)
-            {
-            	printf("Mailbox:Checking pid %d\n", recipient_p->pid);
-                // If the message was sent to current recipient consume it
-                if (recipient_p->pid == recipient)
-                {
-                	printf("Mailbox: Pid %d success\n", recipient_p->pid);
-
-					int messageBytes = strlen(message_ptr->message) * sizeof(char);
-					// Copy the content of the message
-					sys_datacopy(SELF, (vir_bytes)message_ptr->message, who_e, (vir_bytes)m_in.m1_p1, messageBytes);
-
-					printf("Mailbox: Message obtained is %s\n", m_in.m1_p1);
-
-                    // Remove recipient
-                    recipient_p->prev->next = recipient_p->next;
-                    recipient_p->next->prev = recipient_p->prev;
-                    pid_node_t *next_node = recipient_p->next;
-                    pid_node_t *prev_node = recipient_p->prev;
-                    free(recipient_p);
-
-                    // Test if the message has to be garbage collected
-                    if ((next_node->pid == -1) && (prev_node->pid == -1))
-                    {
-                        message_ptr->prev->next = message_ptr->next;
-                        message_ptr->next->prev = message_ptr->prev;
-                        printf("+Mailbox: Message \"%s\" has been garbage collected\n", message_ptr->message);
-                        free(message_ptr);
-                        mailbox->number_of_messages--;
-                    }
-
-                    return OK;
-                }
-                //Otherwise increment recipient's pointer
-                else
-                {
-                	recipient_p = recipient_p->next;
-                }
-            }
-            // Increment message pointer and counter
-            message_ptr = message_ptr->next;
-            i++;
+    do {
+      
+      // Permission to read?
+      int in_permission_list=0;
+      
+      uid_node_t *uid_p = mailbox->receive_access->next;
+                
+      while ((uid_p->uid != -1) && !in_permission_list)
+      {
+        if (uid == uid_p->uid) {
+          in_permission_list=1;
         }
-    }
+        uid_p = uid_p->next;
+      }
+
+      int permission = ((uid==0) || ((mailbox->mailbox_type==SECURE)&&in_permission_list)|| ((mailbox->mailbox_type==PUBLIC)&&!in_permission_list)) ? 1 : 0;
+
+      if(mailbox->number_of_messages > 0 && permission)
+      {
+          int i = 0;
+          message_t *message_ptr = mailbox->head->next;
+          // Iterate over existing messages
+          while (i < mailbox->number_of_messages)
+          {
+          	printf("Mailbox: Checking message number %d\n", i);
+            pid_node_t *recipient_p = message_ptr->recipients->next;
+              // Iterate over messages assigned recipients
+              while (recipient_p->pid != -1)
+              {
+              	printf("Mailbox:Checking pid %d\n", recipient_p->pid);
+                  // If the message has not beer read yet bey current recipient, just consume it
+                  if (recipient_p->pid != recipient)
+                  {
+                      found = 1;
+                  	  printf("Mailbox: Pid %d success\n", recipient_p->pid);
+
+            					int messageBytes = strlen(message_ptr->message) * sizeof(char);
+            					
+                      // Copy the content of the message
+            					
+                      sys_datacopy(SELF, (vir_bytes)message_ptr->message, who_e, (vir_bytes)m_in.m1_p1, messageBytes);
+
+            					printf("Mailbox: Message obtained is %s\n", m_in.m1_p1);
+
+                      // Add recipient (received message notification)
+                      
+                      pid_node_t *new_recipient = malloc(sizeof(pid_node_t));
+                      new_recipient->pid = recipient;
+
+                      new_recipient->next = message_ptr->recipients;
+                      new_recipient->prev = message_ptr->recipients->prev;
+
+                      message_ptr->recipients->prev->next = new_recipient;
+                      message_ptr->recipients->prev = new_recipient;
+
+                      return OK;
+                  }
+                  //Otherwise increment recipient's pointer
+                  else
+                  {
+                  	recipient_p = recipient_p->next;
+                  }
+              }
+              // Increment message pointer and counter
+              message_ptr = message_ptr->next;
+              i++;
+          }
+      }
+      mailbox = mailbox->next;
+    } while (!found && strcmp(mailbox_collection->head->mailbox_name,mailbox->mailbox_name));
     // In case of not find a message for the recipient return error
 
     return ERROR;

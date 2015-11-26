@@ -81,64 +81,58 @@ int send_message(char *mailbox_name,
                  size_t subjectLen,
                  size_t messageLen
                  )
-                 //int *recipients, 
-                 //int recipientsLen)
-{
-	
-	/*int i;
-	//char recipientsString[128];  // 6 [5 from pid + 1 from separator] * 16, will be always lower than 128
-	char *recipientsString;
+{	
 
-	recipientsString = (char *) malloc(6);
-	int written = snprintf(recipientsString, 6, "%d ", *recipients);
+	struct passwd *pwd = getpwnam(username);
 
-	int recipientsStringLen = 6;
-	for (i = 1; i < recipientsLen; i ++)
-	{
-		recipientsString = (char *) realloc (recipientsString, 6 * (i+1));
-		written = snprintf(recipientsString + (written*i), 6, "%d ", *(recipients+i));
-		recipientsStringLen += 6;
+	if (pwd) {
+		message m;
+
+		m.m1_p1 = message_data;
+		m.m1_p2 = message_subject;
+		m.m1_p3 = mailbox_name;
+		m.m1_i1 = (int) messageLen;
+		m.m1_i2 = (int) subjectLen;
+		m.m1_i3 = (int) mailboxNameLen;
+		m.m1_ull1 = (uint64_t) pwd->pw_uid;
+
+		return(_syscall(PM_PROC_NR, PM_DEPOSIT, &m));
 	}
-	//snprintf(recipientsString, 128, "%d", recipients[recipientsLen-1]);
 
-	printf("User: Mapping message %s to pids %s\n", messageData, recipientsString);
-	*/
-	/*m.m1_p1 = messageData;
-	m.m1_p2 = recipientsString;
-	m.m1_i1 = (int) messageLen;
-	m.m1_i2 = recipientsStringLen;*/
-	
-	message m;
-
-	m.m1_p1 = message_data;
-	m.m1_p2 = message_subject;
-	m.m1_p3 = mailbox_name;
-	m.m1_i1 = (int) messageLen;
-	m.m1_i2 = (int) subjectLen;
-	m.m1_i3 = (int) mailboxNameLen;
-
-	return(_syscall(PM_PROC_NR, PM_DEPOSIT, &m));
+	printf("Error: user does not exist.\n");
+    return ERROR;
 }
 
 
 
-int receive_message(char *destBuffer, size_t bufferSize ,int recipient)
+int receive_message(char *destBuffer, size_t bufferSize, int recipient)
 {
-    message m;
-	m.m1_p1 = destBuffer;
-	m.m1_i1 = recipient;
-	m.m1_i2 = (int) bufferSize;
-	int status = _syscall(PM_PROC_NR, PM_RETRIEVE, &m);
-	if (status == ERROR)
-	{
-		printf("ERROR: There is no message for the process\n");
-	}
-	else
-	{
-		printf("+User: message (%d bytes) \"%s\" received\n", m.m1_i2, destBuffer);
+
+	struct passwd *pwd = getpwnam(username);
+
+	if (pwd) {
+		
+		message m;
+		m.m1_p1 = destBuffer;
+		m.m1_i1 = recipient;
+		m.m1_i2 = (int) bufferSize;
+		m.m1_i3 = pwd->pw_uid;
+
+		int status = _syscall(PM_PROC_NR, PM_RETRIEVE, &m);
+		if (status == ERROR)
+		{
+			printf("ERROR: The process couldn't retrieve any message\n");
+		}
+		else
+		{
+			printf("+User: message (%d bytes) \"%s\" received\n", m.m1_i2, destBuffer);
+		}
+
+		return status;
 	}
 
-	return status;
+	printf("Error: user does not exist.\n");
+    return ERROR;
 }
 
 #endif
