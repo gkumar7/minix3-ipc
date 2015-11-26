@@ -622,5 +622,67 @@ int get_from_mailbox()
 }
 
 int do_delete_message() {
-  return 0;
+  int pid = m_in.m1_i1;
+  int mailboxNameLen = m_in.m1_i2;
+  int subjectLen = m_in.m1_i3;
+
+  char *mailboxName;
+  char *subject;
+
+  int mailboxNameBytes = mailboxNameLen * sizeof(char);
+  mailboxName = malloc(mailboxNameBytes);
+  sys_datacopy(who_e, (vir_bytes)m_in.m1_p1, SELF, (vir_bytes)mailboxName, mailboxNameBytes);
+
+  int subjectBytes = subjectLen * sizeof(char);
+  subject = malloc(subjectBytes);
+  sys_datacopy(who_e, (vir_bytes)m_in.m1_p2, SELF, (vir_bytes)subject, subjectBytes);
+  
+  //find mailbox
+  mailbox_t *mailbox = mailbox_collection->head;
+  int found = 0;
+  do {
+    if (!strcmp(mailboxName,mailbox->mailbox_name)) {
+      found = 1;
+    } else {
+      mailbox = mailbox->next;
+    }
+  } while (!found && strcmp(mailbox_collection->head->mailbox_name,mailbox->mailbox_name));
+
+  if (!found) {
+    printf("Error: not found mailbox with given name: %s\n",mailboxName);
+    return ERROR;
+  }
+
+  //check owner
+  if ((pid!=0) && (mailbox->owner!=pid)) 
+  {
+    printf("Error: Only superuser or owner can remove a mailbox\n");
+    return ERROR;
+  }
+
+  //Find message by subject and remove
+  
+  if (mailbox->number_of_messages == 0)
+  {
+        printf("Error: mailbox %s is empty\n",mailboxName);
+        return ERROR;
+  }
+
+  int i = 0;
+  message_t *message_ptr = mailbox->head->next;
+  while (i < mailbox->number_of_messages)
+  {
+    if (!strcmp(message_ptr->subject,subject)) {
+      message_ptr->prev->next = message_ptr->next;
+      message_ptr->next->prev = message_ptr->prev;
+      printf("+Mailbox: Message with subject %s has been deleted\n", subject);
+      free(message_ptr);
+      mailbox->number_of_messages--;
+      return OK;
+    }
+    message_ptr = message_ptr->next;
+    i++;
+  }
+  printf("Error: message with subject %s not found in mailbox %s\n",subject,mailboxName);
+  return ERROR;
 }

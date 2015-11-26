@@ -16,32 +16,9 @@
 #define ERROR -1
 
 
-int update_privileges(char *username, int privileges)
-{
-	// Get UID for user (also check if user exists)
-	struct passwd *pwd = getpwnam(username);
-
-	  if (pwd) {
-	    message m;
-	    m.m1_i1 = pwd->pw_uid;
-	    m.m1_i2 = privileges;
-
-	    return(_syscall(PM_PROC_NR, PM_UPDATE_PRIVILEGES, &m));
-	  }
-}
-
-
 int remove_user(char *username)
 {
-	// Get UID for user (also check if user exists)
-	struct passwd *pwd = getpwnam(username);
 
-	  if (pwd) {
-	    message m;
-	    m.m1_i1 = pwd->pw_uid;
-
-	    return(_syscall(PM_PROC_NR, PM_REMOVE_USER, &m));
-	  }
 }
 
 int add_user(char *username, int privileges){
@@ -164,12 +141,16 @@ int receive_message(char *destBuffer, size_t bufferSize, int recipient)
 }
 
 int delete_message (char *mailbox_name, char *subject) {
+    int mailbox_name_len = strlen(mailbox_name);
+    int subject_len = strlen(subject);
     struct passwd *pwd = getpwnam(username);
     if (pwd) {
       message m;
       m.m1_p1 = mailbox_name;
       m.m1_p2 = subject;
       m.m1_i1 = pwd->pw_uid;
+      m.m1_i2 = mailbox_name_len;
+      m.m1_i3 = subject_len;
       return(_syscall(PM_PROC_NR, PM_DELETE_MESSAGE, &m));
     }
     printf("Error: user does not exist.\n");
