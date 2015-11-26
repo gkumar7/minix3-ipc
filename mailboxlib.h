@@ -112,23 +112,17 @@ int send_message(char *mailbox_name,
 {	
 
 	struct passwd *pwd = getpwnam(username);
+	message m;
 
-	if (pwd) {
-		message m;
+	m.m1_p1 = message_data;
+	m.m1_p2 = message_subject;
+	m.m1_p3 = mailbox_name;
+	m.m1_i1 = (int) messageLen;
+	m.m1_i2 = (int) subjectLen;
+	m.m1_i3 = (int) mailboxNameLen;
+	m.m1_ull1 = (uint64_t) getuid();
 
-		m.m1_p1 = message_data;
-		m.m1_p2 = message_subject;
-		m.m1_p3 = mailbox_name;
-		m.m1_i1 = (int) messageLen;
-		m.m1_i2 = (int) subjectLen;
-		m.m1_i3 = (int) mailboxNameLen;
-		m.m1_ull1 = (uint64_t) pwd->pw_uid;
-
-		return(_syscall(PM_PROC_NR, PM_DEPOSIT, &m));
-	}
-
-	printf("Error: user does not exist.\n");
-    return ERROR;
+	return(_syscall(PM_PROC_NR, PM_DEPOSIT, &m));
 }
 
 
@@ -137,47 +131,37 @@ int receive_message(char *destBuffer, size_t bufferSize, int recipient)
 {
 
 	struct passwd *pwd = getpwnam(username);
-
-	if (pwd) {
 		
-		message m;
-		m.m1_p1 = destBuffer;
-		m.m1_i1 = recipient;
-		m.m1_i2 = (int) bufferSize;
-		m.m1_i3 = pwd->pw_uid;
+  message m;
+	m.m1_p1 = destBuffer;
+	m.m1_i1 = recipient;
+	m.m1_i2 = (int) bufferSize;
+	m.m1_i3 = getuid();
 
-		int status = _syscall(PM_PROC_NR, PM_RETRIEVE, &m);
-		if (status == ERROR)
-		{
-			printf("ERROR: The process couldn't retrieve any message\n");
-		}
-		else
-		{
-			printf("+User: message (%d bytes) \"%s\" received\n", m.m1_i2, destBuffer);
-		}
-
-		return status;
+	int status = _syscall(PM_PROC_NR, PM_RETRIEVE, &m);
+	if (status == ERROR)
+	{
+		printf("ERROR: The process couldn't retrieve any message\n");
+	}
+	else
+	{
+		printf("+User: message (%d bytes) \"%s\" received\n", m.m1_i2, destBuffer);
 	}
 
-	printf("Error: user does not exist.\n");
-  return ERROR;
+		return status;
 }
 
 int delete_message (char *mailbox_name, char *subject) {
     int mailbox_name_len = strlen(mailbox_name);
     int subject_len = strlen(subject);
-    struct passwd *pwd = getpwnam(username);
-    if (pwd) {
-      message m;
-      m.m1_p1 = mailbox_name;
-      m.m1_p2 = subject;
-      m.m1_i1 = pwd->pw_uid;
-      m.m1_i2 = mailbox_name_len;
-      m.m1_i3 = subject_len;
-      return(_syscall(PM_PROC_NR, PM_DELETE_MESSAGE, &m));
-    }
-    printf("Error: user does not exist.\n");
-    return ERROR;
+    message m;
+    m.m1_p1 = mailbox_name;
+    m.m1_p2 = subject;
+    m.m1_i1 = getuid();
+    m.m1_i2 = mailbox_name_len;
+    m.m1_i3 = subject_len;
+    return(_syscall(PM_PROC_NR, PM_DELETE_MESSAGE, &m));
+
 }
 
 #endif
