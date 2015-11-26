@@ -98,3 +98,4 @@ int do_add_mailbox();
 
 int add_to_mailbox();
 int get_from_mailbox();
+int do_delete_message();

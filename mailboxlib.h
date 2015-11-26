@@ -105,7 +105,7 @@ int send_message(char *mailbox_name,
 	}
 
 	printf("Error: user does not exist.\n");
-    return ERROR;
+  return ERROR;
 }
 
 
@@ -137,6 +137,19 @@ int receive_message(char *destBuffer, size_t bufferSize, int recipient)
 	}
 
 	printf("Error: user does not exist.\n");
+  return ERROR;
+}
+
+int delete_message (char *mailbox_name, char *subject) {
+    struct passwd *pwd = getpwnam(username);
+    if (pwd) {
+      message m;
+      m.m1_p1 = mailbox_name;
+      m.m1_p2 = subject;
+      m.m1_i1 = pwd->pw_uid;
+      return(_syscall(PM_PROC_NR, PM_DELETE_MESSAGE, &m));
+    }
+    printf("Error: user does not exist.\n");
     return ERROR;
 }
 

@@ -620,3 +620,7 @@ int get_from_mailbox()
 
     return ERROR;
 }
+
+int do_delete_message() {
+
+}
