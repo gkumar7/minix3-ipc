@@ -622,5 +622,5 @@ int get_from_mailbox()
 }
 
 int do_delete_message() {
-
+  return 0;
 }
