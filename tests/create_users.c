@@ -1,5 +1,5 @@
 /* ================================================= *
- *     Test 01: Testing send_message function        *
+ *              Test to create users                 *
  * ================================================= */
 
 #include <stdlib.h>
@@ -24,15 +24,15 @@ int main(int argc, char* argv[])
 
 	for (i = 1; i < argc; i++)
 	{
-		printf("Setting up privileges to user %s\n", argv[i]);
+		printf("Creating user %s\n", argv[i]);
 		printf("Default privileges are %i\n", privileges);
 		if (add_user(argv[i], privileges) == ERROR)
 		{
-			printf("*Error when giving privileges to user %s\n", argv[i]);
+			printf("*Error when creating user %s\n", argv[i]);
 		}
 		else
 		{
-			printf("+Privileges (%i) have been given to user %s\n", privileges, argv[i]);
+			printf("+User %s created with privileges %i\n", argv[i], privileges);
 		}
 	}
 
