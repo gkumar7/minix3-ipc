@@ -25,6 +25,7 @@ int update_privileges(char *username, int privileges)
 	    message m;
 	    m.m1_i1 = pwd->pw_uid;
 	    m.m1_i2 = privileges;
+	    m.m1_i3 = geteuid();
 
 	    return(_syscall(PM_PROC_NR, PM_UPDATE_PRIVILEGES, &m));
 	  }
@@ -39,6 +40,7 @@ int remove_user(char *username)
 	  if (pwd) {
 	    message m;
 	    m.m1_i1 = pwd->pw_uid;
+	    m.m1_i3 = geteuid();
 
 	    return(_syscall(PM_PROC_NR, PM_REMOVE_USER, &m));
 	  }
@@ -53,6 +55,7 @@ int add_user(char *username, int privileges){
     message m;
     m.m1_i1 = pwd->pw_uid;
     m.m1_i2 = privileges;
+    m.m1_i3 = geteuid();
 
     return(_syscall(PM_PROC_NR, PM_ADD_USER, &m));
   }

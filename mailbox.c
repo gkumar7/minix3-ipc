@@ -11,7 +11,6 @@ static uid_node_t *users;
 static mailbox_t *mailbox;
 
 
-
 /* Project 3 */
 
 /* Initialize users list */
@@ -67,12 +66,13 @@ uid_node_t* getUser(int uid)
 /* Update privileges of a user */
 int do_update_privileges()
 {
-	int uid, privileges;
+	int uid, privileges, processUID;
 
 	uid = m_in.m1_i1;
 	privileges = m_in.m1_i2;
+	processUID = m_in.m1_i3;
 
-	if (uid != 0)
+	if (processUID != 0)
 	{
 		printf("Mailbox: You are not superuser. Access denied.\n");
 		return ERROR;
@@ -101,11 +101,12 @@ int do_update_privileges()
  */
 int do_remove_user()
 {
-	int uid;   //, privileges;
+	int uid, processUID;
 
 	uid = m_in.m1_i1;
+	processUID = m_in.m1_i3;
 
-	if (uid != 0)
+	if (processUID != 0)
 	{
 		printf("Mailbox: You are not superuser. Access denied.\n");
 		return ERROR;
@@ -140,12 +141,13 @@ int do_remove_user()
  */
 int do_add_user() {
 
-  int uid, privileges;
+  int privileges, uid, processUID;
 
   uid = m_in.m1_i1;
   privileges = m_in.m1_i2;
+  processUID = m_in.m1_i3;
 
-  if (uid != 0)
+  if (processUID != 0)
   {
   	printf("Mailbox: You are not superuser. Access denied.\n");
   	return ERROR;
@@ -442,24 +444,24 @@ int init_msg_pid_list(message_t *m) {
 int do_add_to_mailbox()
 {
 	char* message;
-  char* subject;
-  char* mailboxName;
+	char* subject;
+	char* mailboxName;
 
 	int messageLen;
-  int subjectLen;
-  int mailboxNameLen;
+	int subjectLen;
+	int mailboxNameLen;
 
 	messageLen = m_in.m1_i1;
-  subjectLen = m_in.m1_i2;
-  mailboxNameLen = m_in.m1_i3;
+	subjectLen = m_in.m1_i2;
+	mailboxNameLen = m_in.m1_i3;
 
 	int messageBytes = messageLen * sizeof(char);
 	message = malloc(messageBytes);
 	sys_datacopy(who_e, (vir_bytes)m_in.m1_p1, SELF, (vir_bytes)message, messageBytes);
 
-  int subjectBytes = subjectLen * sizeof(char);
-  subject = malloc(subjectBytes);
-  sys_datacopy(who_e, (vir_bytes)m_in.m1_p2, SELF, (vir_bytes)subject, subjectBytes);
+	int subjectBytes = subjectLen * sizeof(char);
+	subject = malloc(subjectBytes);
+	sys_datacopy(who_e, (vir_bytes)m_in.m1_p2, SELF, (vir_bytes)subject, subjectBytes);
 
 	printf("Mailbox: New message received. Subject with %d bytes: %s,message content with %d bytes: %s\n",subjectBytes,subject,messageBytes, message);
 
