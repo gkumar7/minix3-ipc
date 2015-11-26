@@ -74,7 +74,7 @@ int do_update_privileges()
 
 	if (uid != 0)
 	{
-		printf("Mailbox: You are not superuser. Access denied.\n";
+		printf("Mailbox: You are not superuser. Access denied.\n");
 		return ERROR;
 	}
 
@@ -107,7 +107,7 @@ int do_remove_user()
 
 	if (uid != 0)
 	{
-		printf("Mailbox: You are not superuser. Access denied.\n";
+		printf("Mailbox: You are not superuser. Access denied.\n");
 		return ERROR;
 	}
 
@@ -147,7 +147,7 @@ int do_add_user() {
 
   if (uid != 0)
   {
-  	printf("Mailbox: You are not superuser. Access denied.\n";
+  	printf("Mailbox: You are not superuser. Access denied.\n");
   	return ERROR;
   }
 
@@ -439,7 +439,7 @@ int init_msg_pid_list(message_t *m) {
  * Returns OK if message was successfully added
  * Returns ERROR if mailbox is full
  */
-int add_to_mailbox()
+int do_add_to_mailbox()
 {
 	char* message;
   char* subject;
@@ -537,7 +537,7 @@ int add_to_mailbox()
  * Garbage collect a given message if all designated processes have received the message
  * Deadlock can occur if the mailbox is full, and no process retrieves the messages from the mailbox
  */
-int get_from_mailbox()
+int do_get_from_mailbox()
 {
     char *message;
     int recipient = m_in.m1_i1;

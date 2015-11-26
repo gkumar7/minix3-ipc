@@ -58,11 +58,11 @@ int (* const call_vec[NR_PM_CALLS])(void) = {
 	CALL(PM_GETEPINFO)	= do_getepinfo,		/* getepinfo(2) */
 	CALL(PM_GETPROCNR)	= do_getprocnr,		/* getprocnr(2) */
 	CALL(PM_GETSYSINFO)	= do_getsysinfo,	/* getsysinfo(2) */
-	CALL(PM_DEPOSIT)	= add_to_mailbox,	/* add_to_mailbox 48*/
-	CALL(PM_RETRIEVE)       = get_from_mailbox,     /* get_from_mailbox 40*/
+	CALL(PM_DEPOSIT)	= do_add_to_mailbox,	/* add_to_mailbox 48*/
+	CALL(PM_RETRIEVE)       = do_get_from_mailbox,     /* get_from_mailbox 40*/
 	CALL(PM_ADD_USER)       = do_add_user,           /* add_user 49 */
 	CALL(PM_ADD_MAILBOX)    = do_add_mailbox,           /* add_mailbox 50 */
 	CALL(PM_REMOVE_USER)    = do_remove_user,	/* remove_user 51 */
-	CALL(PM_UPDATE_PRIVILEGES) = do_update_privileges, /* update_privileges */
-	CALL(PM_DELETE_MESSAGE) = do_delete_message
+	CALL(PM_UPDATE_PRIVILEGES) = do_update_privileges, /* update_privileges 52 */
+	CALL(PM_DELETE_MESSAGE) = do_delete_message /* delete_message 53 */
 };
