@@ -17,7 +17,7 @@ int main(int argc, char* argv[])
 	size_t bufferSize;
 	int recipient;
 
-	if (recieve_message(destBuffer, bufferSize, recipient) == ERROR)
+	if (receive_message(destBuffer, bufferSize, recipient) == ERROR)
 	{
 		printf("*Error when creating mailbox");
 	}
