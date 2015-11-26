@@ -111,7 +111,7 @@ int send_message(char *mailbox_name,
                  )
 {	
 
-	struct passwd *pwd = getpwnam(username);
+	//struct passwd *pwd = getpwnam(username);
 	message m;
 
 	m.m1_p1 = message_data;
@@ -130,7 +130,7 @@ int send_message(char *mailbox_name,
 int receive_message(char *destBuffer, size_t bufferSize, int recipient)
 {
 
-	struct passwd *pwd = getpwnam(username);
+	//struct passwd *pwd = getpwnam(username);
 		
   message m;
 	m.m1_p1 = destBuffer;

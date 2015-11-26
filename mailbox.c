@@ -72,6 +72,12 @@ int do_update_privileges()
 	uid = m_in.m1_i1;
 	privileges = m_in.m1_i2;
 
+	if (uid != 0)
+	{
+		printf("Mailbox: You are not superuser. Access denied.\n";
+		return ERROR;
+	}
+
 	// Updating user privileges
 	uid_node_t *user_to_update = getUser(uid);
 
@@ -99,12 +105,11 @@ int do_remove_user()
 
 	uid = m_in.m1_i1;
 
-	/* If user does not exist, error */
-	/*if (!userExists(uid))
+	if (uid != 0)
 	{
-		printf("Mailbox: The user with uid %d does not exist and can not be removed.\n", uid);
+		printf("Mailbox: You are not superuser. Access denied.\n";
 		return ERROR;
-	}*/
+	}
 
 	// Removing user from the list
 	uid_node_t *user_to_remove = getUser(uid);
@@ -139,6 +144,12 @@ int do_add_user() {
 
   uid = m_in.m1_i1;
   privileges = m_in.m1_i2;
+
+  if (uid != 0)
+  {
+  	printf("Mailbox: You are not superuser. Access denied.\n";
+  	return ERROR;
+  }
 
   if (!users){
     init_users();
