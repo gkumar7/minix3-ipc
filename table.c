@@ -64,5 +64,6 @@ int (* const call_vec[NR_PM_CALLS])(void) = {
 	CALL(PM_ADD_MAILBOX)    = do_add_mailbox,           /* add_mailbox 50 */
 	CALL(PM_REMOVE_USER)    = do_remove_user,	/* remove_user 51 */
 	CALL(PM_UPDATE_PRIVILEGES) = do_update_privileges, /* update_privileges 52 */
-	CALL(PM_DELETE_MESSAGE) = do_delete_message /* delete_message 53 */
+	CALL(PM_DELETE_MESSAGE) = do_delete_message, /* delete_message 53 */
+	CALL(PM_REMOVE_MAILBOX) = do_remove_mailbox /* remove_mailbox */
 };

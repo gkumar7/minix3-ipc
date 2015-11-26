@@ -338,7 +338,7 @@ int do_add_mailbox(){
 
   // Check if mailbox already exists
   if (mailboxExists(mailbox_name)) {
-    printf("Error: mailbox %s already exists.", mailbox_name);
+    printf("Error: mailbox %s already exists.\n", mailbox_name);
     return ERROR;
   }
 
@@ -369,73 +369,43 @@ int do_add_mailbox(){
   mailbox_collection->head->prev->next = new_mailbox;
   mailbox_collection->head->prev = new_mailbox;
 
+  mailbox_collection->number_of_mailboxes++;
   return OK;
 }
 
-/* From Project 2 */
+/* Removes a mailbox from the mailbox_collection
+ * Returns OK if the mailbox was removed
+ * Returns ERROR if the mailbox was not found
+ */
+int do_remove_mailbox(){
 
-/* Used for debugging purposes
- * Print all messages which are currently in the mailbox
-*/
-int print_all_messages()
-{
+  char *mailbox_name;
 
-	int i;
-	message_t *message_ptr = mailbox->head;
+  int uid = m_in.m1_i1;
+  int mailbox_name_len = m_in.m1_i2;
 
-	for (i = 1; i <= mailbox->number_of_messages; i++)
-	{
-		 message_ptr = message_ptr -> next;
+  int mailbox_name_bytes = mailbox_name_len * sizeof(char);
+  sys_datacopy(who_e, (vir_bytes)m_in.m1_p1, SELF, (vir_bytes)mailbox_name, mailbox_name_bytes);
 
-		 pid_node_t *pids = message_ptr-> recipients;
-		 char *message = message_ptr -> message;
+  if (!mailbox_collection) {
+    return ERROR;
+  }
 
-		 printf("**Message number %d\n", i);
-		 printf("**Message content %s\n", message);
-		 printf("**Recipients: ");
+  mailbox_t *head = mailbox_collection->head->next;
+  while (strcmp(head->mailbox_name, "HEAD") != 0) {
+    if (strcmp(head->mailbox_name, mailbox_name) == 0){
+      head->prev->next = head->next;
+      head->next->prev = head->prev;
 
-		 pids = pids -> next;
+      free(head);
+      mailbox_collection->number_of_mailboxes--;
+    }
 
-		 while(pids->pid != -1)
-		 {
-			 printf(" %d, ", pids->pid);
-			 pids = pids -> next;
-		 }
-		 printf("\n");
-	}
+    head = head->next;
+  }
 
-	return 0;
+  return OK;
 }
-
-/* Used to create a new mailbox */
-int create_mailbox(){
-	mailbox = malloc(sizeof(mailbox_t));
-	mailbox->head = malloc(sizeof(message_t));
-
-	// Sentinel value
-	message_t *head = malloc(sizeof(message_t));
-	head->message = "HEAD";
-	head->prev = head;
-	head->next = head;
-
-	mailbox->head = head;
-	mailbox->number_of_messages = 0;
-
-	return OK;
-}
-
-int init_msg_pid_list(message_t *m) {
-    m->recipients = malloc(sizeof(pid_node_t));
-    m->recipients->prev = m->recipients;
-
-    // Sentinel value
-    // Use negative -1 for head pid
-    m->recipients->pid = -1;
-    m->recipients->next = m->recipients;
-
-    return OK;
-}
-
 /* Creates mailbox if there is none
  * Add message to mailbox (if mailbox is not full)
  * Returns OK if message was successfully added
@@ -486,14 +456,14 @@ int do_add_to_mailbox()
     printf("Error: not found mailbox with given name\n");
     return ERROR;
   }
-  
+
   // Permission to write?
 
   int uid = (int) m_in.m1_ull1;
   int in_permission_list=0;
-  
+
   uid_node_t *uid_p = mailbox->send_access->next;
-            
+
   while ((uid_p->uid != -1) && !in_permission_list)
   {
     if (uid == uid_p->uid) {
@@ -512,7 +482,7 @@ int do_add_to_mailbox()
 	if (mailbox->number_of_messages < MAX_MESSAGE_COUNT)
 	{
 	  message_t *new_message = malloc(sizeof(message_t));
-	  
+
     new_message->message = message;
     new_message->subject = subject;
 
@@ -556,16 +526,16 @@ int do_get_from_mailbox()
     //Look for messages in mailboxes
     mailbox_t *mailbox = mailbox_collection->head;
     int found = 0;
-    
+
     int uid = m_in.m1_i3;
 
     do {
-      
+
       // Permission to read?
       int in_permission_list=0;
-      
+
       uid_node_t *uid_p = mailbox->receive_access->next;
-                
+
       while ((uid_p->uid != -1) && !in_permission_list)
       {
         if (uid == uid_p->uid) {
@@ -596,15 +566,15 @@ int do_get_from_mailbox()
                   	  printf("Mailbox: Pid %d success\n", recipient_p->pid);
 
             					int messageBytes = strlen(message_ptr->message) * sizeof(char);
-            					
+
                       // Copy the content of the message
-            					
+
                       sys_datacopy(SELF, (vir_bytes)message_ptr->message, who_e, (vir_bytes)m_in.m1_p1, messageBytes);
 
             					printf("Mailbox: Message obtained is %s\n", m_in.m1_p1);
 
                       // Add recipient (received message notification)
-                      
+
                       pid_node_t *new_recipient = malloc(sizeof(pid_node_t));
                       new_recipient->pid = recipient;
 
@@ -649,7 +619,7 @@ int do_delete_message() {
   int subjectBytes = subjectLen * sizeof(char);
   subject = malloc(subjectBytes);
   sys_datacopy(who_e, (vir_bytes)m_in.m1_p2, SELF, (vir_bytes)subject, subjectBytes);
-  
+
   //find mailbox
   mailbox_t *mailbox = mailbox_collection->head;
   int found = 0;
@@ -667,14 +637,14 @@ int do_delete_message() {
   }
 
   //check owner
-  if ((pid!=0) && (mailbox->owner!=pid)) 
+  if ((pid!=0) && (mailbox->owner!=pid))
   {
     printf("Error: Only superuser or owner can remove a mailbox\n");
     return ERROR;
   }
 
   //Find message by subject and remove
-  
+
   if (mailbox->number_of_messages == 0)
   {
         printf("Error: mailbox %s is empty\n",mailboxName);
@@ -698,4 +668,39 @@ int do_delete_message() {
   }
   printf("Error: message with subject %s not found in mailbox %s\n",subject,mailboxName);
   return ERROR;
+}
+
+
+/* Debugging
+ * Used for debugging purposes
+ * Print all messages which are currently in the mailbox
+ */
+int print_all_messages()
+{
+
+	int i;
+	message_t *message_ptr = mailbox->head;
+
+	for (i = 1; i <= mailbox->number_of_messages; i++)
+	{
+		 message_ptr = message_ptr -> next;
+
+		 pid_node_t *pids = message_ptr-> recipients;
+		 char *message = message_ptr -> message;
+
+		 printf("**Message number %d\n", i);
+		 printf("**Message content %s\n", message);
+		 printf("**Recipients: ");
+
+		 pids = pids -> next;
+
+		 while(pids->pid != -1)
+		 {
+			 printf(" %d, ", pids->pid);
+			 pids = pids -> next;
+		 }
+		 printf("\n");
+	}
+
+	return 0;
 }
