@@ -1,5 +1,5 @@
 /* ================================================= *
- *     Test 01: Testing send_message function        *
+ *              Test for removing users              *
  * ================================================= */
 
 #include <stdlib.h>

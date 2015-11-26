@@ -13,7 +13,7 @@
 int main(int argc, char* argv[])
 {
 
-	/* Modify call manually */
+	/* Modify call manually */gi
 	int mailboxType = 0;
 	char *mailboxName = "mailboxTest";
 	char *sendersPids = "1000 1001";

@@ -1,5 +1,5 @@
 /* ================================================= *
- *            Test to create mailboxes               *
+ *            Test for recieving messages            *
  * ================================================= */
 
 #include <stdlib.h>

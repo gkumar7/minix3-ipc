@@ -1,5 +1,5 @@
 /* ================================================= *
- *            Test to create mailboxes               *
+ *            Test for deleting messages             *
  * ================================================= */
 
 #include <stdlib.h>
