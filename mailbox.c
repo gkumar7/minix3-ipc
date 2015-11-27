@@ -248,16 +248,6 @@ int print_access_list(uid_node_t *access_list){
   return OK;
 }
 
-int init_uid_access_list(uid_node_t *access_list) {
-  // Sentinel value
-  access_list = malloc(sizeof(uid_node_t));
-  access_list->uid = -1;
-
-  access_list->prev = access_list;
-  access_list->next = access_list;
-  return OK;
-}
-
 int get_privileges_for_user(int uid) {
   uid_node_t *head = users->next;
   while (head->uid != -1){
@@ -271,9 +261,13 @@ int get_privileges_for_user(int uid) {
 }
 
 int create_list(char *access_list_str, uid_node_t *access_list) {
-  if (!access_list){
-    init_uid_access_list(access_list);
-  }
+
+  // Initialize access_list
+  access_list = malloc(sizeof(uid_node_t));
+  access_list->uid = -1;
+
+  access_list->prev = access_list;
+  access_list->next = access_list;
 
   const char delim[2] = " ";
   char *access_p = strtok(access_list_str, delim);
@@ -292,6 +286,7 @@ int create_list(char *access_list_str, uid_node_t *access_list) {
       new_uid->privileges = privileges;
 
       new_uid->next = access_list;
+
       new_uid->prev = access_list->prev;
 
       access_list->prev->next = new_uid;
