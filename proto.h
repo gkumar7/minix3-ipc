@@ -95,12 +95,13 @@ void set_rusage_times(struct rusage *r_usage, clock_t user_time,
 /* mailbox.c */
 int do_add_user();
 int do_add_mailbox();
+int do_remove_mailbox();
 
 int do_remove_user();
 int do_update_privileges();
 
-int add_to_mailbox();
-int get_from_mailbox();
+int do_add_to_mailbox();
+int do_get_from_mailbox();
 int do_delete_message();
 
 int do_add_sender();

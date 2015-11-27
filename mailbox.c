@@ -11,7 +11,6 @@ static uid_node_t *users;
 static mailbox_t *mailbox;
 
 
-
 /* Project 3 */
 
 /* Initialize users list */
@@ -67,10 +66,17 @@ uid_node_t* getUser(int uid)
 /* Update privileges of a user */
 int do_update_privileges()
 {
-	int uid, privileges;
+	int uid, privileges, processUID;
 
 	uid = m_in.m1_i1;
 	privileges = m_in.m1_i2;
+	processUID = m_in.m1_i3;
+
+	if (processUID != 0)
+	{
+		printf("Mailbox: You are not superuser. Access denied.\n");
+		return ERROR;
+	}
 
 	// Updating user privileges
 	uid_node_t *user_to_update = getUser(uid);
@@ -95,16 +101,16 @@ int do_update_privileges()
  */
 int do_remove_user()
 {
-	int uid;   //, privileges;
+	int uid, processUID;
 
 	uid = m_in.m1_i1;
+	processUID = m_in.m1_i3;
 
-	/* If user does not exist, error */
-	/*if (!userExists(uid))
+	if (processUID != 0)
 	{
-		printf("Mailbox: The user with uid %d does not exist and can not be removed.\n", uid);
+		printf("Mailbox: You are not superuser. Access denied.\n");
 		return ERROR;
-	}*/
+	}
 
 	// Removing user from the list
 	uid_node_t *user_to_remove = getUser(uid);
@@ -135,10 +141,17 @@ int do_remove_user()
  */
 int do_add_user() {
 
-  int uid, privileges;
+  int privileges, uid, processUID;
 
   uid = m_in.m1_i1;
   privileges = m_in.m1_i2;
+  processUID = m_in.m1_i3;
+
+  if (processUID != 0)
+  {
+  	printf("Mailbox: You are not superuser. Access denied.\n");
+  	return ERROR;
+  }
 
   if (!users){
     init_users();
@@ -325,7 +338,7 @@ int do_add_mailbox(){
 
   // Check if mailbox already exists
   if (mailboxExists(mailbox_name)) {
-    printf("Error: mailbox %s already exists.", mailbox_name);
+    printf("Error: mailbox %s already exists.\n", mailbox_name);
     return ERROR;
   }
 
@@ -356,99 +369,69 @@ int do_add_mailbox(){
   mailbox_collection->head->prev->next = new_mailbox;
   mailbox_collection->head->prev = new_mailbox;
 
+  mailbox_collection->number_of_mailboxes++;
   return OK;
 }
 
-/* From Project 2 */
+/* Removes a mailbox from the mailbox_collection
+ * Returns OK if the mailbox was removed
+ * Returns ERROR if the mailbox was not found
+ */
+int do_remove_mailbox(){
 
-/* Used for debugging purposes
- * Print all messages which are currently in the mailbox
-*/
-int print_all_messages()
-{
+  char *mailbox_name;
 
-	int i;
-	message_t *message_ptr = mailbox->head;
+  int uid = m_in.m1_i1;
+  int mailbox_name_len = m_in.m1_i2;
 
-	for (i = 1; i <= mailbox->number_of_messages; i++)
-	{
-		 message_ptr = message_ptr -> next;
+  int mailbox_name_bytes = mailbox_name_len * sizeof(char);
+  sys_datacopy(who_e, (vir_bytes)m_in.m1_p1, SELF, (vir_bytes)mailbox_name, mailbox_name_bytes);
 
-		 pid_node_t *pids = message_ptr-> recipients;
-		 char *message = message_ptr -> message;
+  if (!mailbox_collection) {
+    return ERROR;
+  }
 
-		 printf("**Message number %d\n", i);
-		 printf("**Message content %s\n", message);
-		 printf("**Recipients: ");
+  mailbox_t *head = mailbox_collection->head->next;
+  while (strcmp(head->mailbox_name, "HEAD") != 0) {
+    if (strcmp(head->mailbox_name, mailbox_name) == 0){
+      head->prev->next = head->next;
+      head->next->prev = head->prev;
 
-		 pids = pids -> next;
+      free(head);
+      mailbox_collection->number_of_mailboxes--;
+    }
 
-		 while(pids->pid != -1)
-		 {
-			 printf(" %d, ", pids->pid);
-			 pids = pids -> next;
-		 }
-		 printf("\n");
-	}
+    head = head->next;
+  }
 
-	return 0;
+  return OK;
 }
-
-/* Used to create a new mailbox */
-int create_mailbox(){
-	mailbox = malloc(sizeof(mailbox_t));
-	mailbox->head = malloc(sizeof(message_t));
-
-	// Sentinel value
-	message_t *head = malloc(sizeof(message_t));
-	head->message = "HEAD";
-	head->prev = head;
-	head->next = head;
-
-	mailbox->head = head;
-	mailbox->number_of_messages = 0;
-
-	return OK;
-}
-
-int init_msg_pid_list(message_t *m) {
-    m->recipients = malloc(sizeof(pid_node_t));
-    m->recipients->prev = m->recipients;
-
-    // Sentinel value
-    // Use negative -1 for head pid
-    m->recipients->pid = -1;
-    m->recipients->next = m->recipients;
-
-    return OK;
-}
-
 /* Creates mailbox if there is none
  * Add message to mailbox (if mailbox is not full)
  * Returns OK if message was successfully added
  * Returns ERROR if mailbox is full
  */
-int add_to_mailbox()
+int do_add_to_mailbox()
 {
 	char* message;
-  char* subject;
-  char* mailboxName;
+	char* subject;
+	char* mailboxName;
 
 	int messageLen;
-  int subjectLen;
-  int mailboxNameLen;
+	int subjectLen;
+	int mailboxNameLen;
 
 	messageLen = m_in.m1_i1;
-  subjectLen = m_in.m1_i2;
-  mailboxNameLen = m_in.m1_i3;
+	subjectLen = m_in.m1_i2;
+	mailboxNameLen = m_in.m1_i3;
 
 	int messageBytes = messageLen * sizeof(char);
 	message = malloc(messageBytes);
 	sys_datacopy(who_e, (vir_bytes)m_in.m1_p1, SELF, (vir_bytes)message, messageBytes);
 
-  int subjectBytes = subjectLen * sizeof(char);
-  subject = malloc(subjectBytes);
-  sys_datacopy(who_e, (vir_bytes)m_in.m1_p2, SELF, (vir_bytes)subject, subjectBytes);
+	int subjectBytes = subjectLen * sizeof(char);
+	subject = malloc(subjectBytes);
+	sys_datacopy(who_e, (vir_bytes)m_in.m1_p2, SELF, (vir_bytes)subject, subjectBytes);
 
 	printf("Mailbox: New message received. Subject with %d bytes: %s,message content with %d bytes: %s\n",subjectBytes,subject,messageBytes, message);
 
@@ -473,14 +456,14 @@ int add_to_mailbox()
     printf("Error: not found mailbox with given name\n");
     return ERROR;
   }
-  
+
   // Permission to write?
 
   int uid = (int) m_in.m1_ull1;
   int in_permission_list=0;
-  
+
   uid_node_t *uid_p = mailbox->send_access->next;
-            
+
   while ((uid_p->uid != -1) && !in_permission_list)
   {
     if (uid == uid_p->uid) {
@@ -499,7 +482,7 @@ int add_to_mailbox()
 	if (mailbox->number_of_messages < MAX_MESSAGE_COUNT)
 	{
 	  message_t *new_message = malloc(sizeof(message_t));
-	  
+
     new_message->message = message;
     new_message->subject = subject;
 
@@ -526,7 +509,7 @@ int add_to_mailbox()
  * Garbage collect a given message if all designated processes have received the message
  * Deadlock can occur if the mailbox is full, and no process retrieves the messages from the mailbox
  */
-int get_from_mailbox()
+int do_get_from_mailbox()
 {
     char *message;
     int recipient = m_in.m1_i1;
@@ -543,16 +526,16 @@ int get_from_mailbox()
     //Look for messages in mailboxes
     mailbox_t *mailbox = mailbox_collection->head;
     int found = 0;
-    
+
     int uid = m_in.m1_i3;
 
     do {
-      
+
       // Permission to read?
       int in_permission_list=0;
-      
+
       uid_node_t *uid_p = mailbox->receive_access->next;
-                
+
       while ((uid_p->uid != -1) && !in_permission_list)
       {
         if (uid == uid_p->uid) {
@@ -583,15 +566,15 @@ int get_from_mailbox()
                   	  printf("Mailbox: Pid %d success\n", recipient_p->pid);
 
             					int messageBytes = strlen(message_ptr->message) * sizeof(char);
-            					
+
                       // Copy the content of the message
-            					
+
                       sys_datacopy(SELF, (vir_bytes)message_ptr->message, who_e, (vir_bytes)m_in.m1_p1, messageBytes);
 
             					printf("Mailbox: Message obtained is %s\n", m_in.m1_p1);
 
                       // Add recipient (received message notification)
-                      
+
                       pid_node_t *new_recipient = malloc(sizeof(pid_node_t));
                       new_recipient->pid = recipient;
 
@@ -636,7 +619,7 @@ int do_delete_message() {
   int subjectBytes = subjectLen * sizeof(char);
   subject = malloc(subjectBytes);
   sys_datacopy(who_e, (vir_bytes)m_in.m1_p2, SELF, (vir_bytes)subject, subjectBytes);
-  
+
   //find mailbox
   mailbox_t *mailbox = mailbox_collection->head;
   int found = 0;
@@ -654,14 +637,14 @@ int do_delete_message() {
   }
 
   //check owner
-  if ((pid!=0) && (mailbox->owner!=pid)) 
+  if ((pid!=0) && (mailbox->owner!=pid))
   {
     printf("Error: Only superuser or owner can remove a mailbox\n");
     return ERROR;
   }
 
   //Find message by subject and remove
-  
+
   if (mailbox->number_of_messages == 0)
   {
         printf("Error: mailbox %s is empty\n",mailboxName);
@@ -900,5 +883,38 @@ int do_remove_receiver () {
 
   printf("Error: user not found in mailbox with given name: %s\n",mailboxName);
   return ERROR;
+}
 
+/* Debugging
+ * Used for debugging purposes
+ * Print all messages which are currently in the mailbox
+ */
+int print_all_messages()
+{
+
+	int i;
+	message_t *message_ptr = mailbox->head;
+
+	for (i = 1; i <= mailbox->number_of_messages; i++)
+	{
+		 message_ptr = message_ptr -> next;
+
+		 pid_node_t *pids = message_ptr-> recipients;
+		 char *message = message_ptr -> message;
+
+		 printf("**Message number %d\n", i);
+		 printf("**Message content %s\n", message);
+		 printf("**Recipients: ");
+
+		 pids = pids -> next;
+
+		 while(pids->pid != -1)
+		 {
+			 printf(" %d, ", pids->pid);
+			 pids = pids -> next;
+		 }
+		 printf("\n");
+	}
+
+	return 0;
 }

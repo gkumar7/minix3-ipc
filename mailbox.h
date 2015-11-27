@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <lib.h>
 #include <string.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #define MAX_MESSAGE_COUNT 16
 #define OK 0

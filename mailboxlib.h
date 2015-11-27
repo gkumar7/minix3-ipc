@@ -25,6 +25,7 @@ int update_privileges(char *username, int privileges)
 	    message m;
 	    m.m1_i1 = pwd->pw_uid;
 	    m.m1_i2 = privileges;
+	    m.m1_i3 = geteuid();
 
 	    return(_syscall(PM_PROC_NR, PM_UPDATE_PRIVILEGES, &m));
 	  }
@@ -39,6 +40,7 @@ int remove_user(char *username)
 	  if (pwd) {
 	    message m;
 	    m.m1_i1 = pwd->pw_uid;
+	    m.m1_i3 = geteuid();
 
 	    return(_syscall(PM_PROC_NR, PM_REMOVE_USER, &m));
 	  }
@@ -53,6 +55,7 @@ int add_user(char *username, int privileges){
     message m;
     m.m1_i1 = pwd->pw_uid;
     m.m1_i2 = privileges;
+    m.m1_i3 = geteuid();
 
     return(_syscall(PM_PROC_NR, PM_ADD_USER, &m));
   }
@@ -72,7 +75,7 @@ int add_mailbox(int mailbox_type, char *mailbox_name, char *send_access, char *r
   message m;
 
   m.m1_i1 = getuid();
-  m.m1_i2 = strlen(mailbox_name);
+  m.m1_i2 = strlen(mailbox_name) + 1;
 
   m.m1_p1 = mailbox_name;
   m.m1_p2 = send_access;
@@ -95,23 +98,33 @@ int add_mailbox(int mailbox_type, char *mailbox_name, char *send_access, char *r
   send_receive_lens = strcat(send_receive_lens, " ");
   send_receive_lens = strcat(send_receive_lens, buf2);
 
-  m.m1_i3 = strlen(send_receive_lens);
+  m.m1_i3 = strlen(send_receive_lens) + 1;
   m.m1_p4 = send_receive_lens;
 
   return(_syscall(PM_PROC_NR, PM_ADD_MAILBOX, &m));
 }
 
+int remove_mailbox(char *mailbox_name){
+  message m;
 
-int send_message(char *mailbox_name, 
+  m.m1_i1 = getuid();
+  m.m1_i2 = strlen(mailbox_name) + 1;
+
+  m.m1_p1 = mailbox_name;
+
+  return(_syscall(PM_PROC_NR, PM_REMOVE_MAILBOX, &m));
+}
+
+int send_message(char *mailbox_name,
                  char *message_subject,
                  char *message_data,
                  size_t mailboxNameLen,
                  size_t subjectLen,
                  size_t messageLen
                  )
-{	
+{
 
-	struct passwd *pwd = getpwnam(username);
+	//struct passwd *pwd = getpwnam(username);
 	message m;
 
 	m.m1_p1 = message_data;
@@ -130,8 +143,8 @@ int send_message(char *mailbox_name,
 int receive_message(char *destBuffer, size_t bufferSize, int recipient)
 {
 
-	struct passwd *pwd = getpwnam(username);
-		
+	//struct passwd *pwd = getpwnam(username);
+
   message m;
 	m.m1_p1 = destBuffer;
 	m.m1_i1 = recipient;
