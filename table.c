@@ -63,7 +63,11 @@ int (* const call_vec[NR_PM_CALLS])(void) = {
 	CALL(PM_ADD_USER)       = do_add_user,           /* add_user 49 */
 	CALL(PM_ADD_MAILBOX)    = do_add_mailbox,           /* add_mailbox 50 */
 	CALL(PM_REMOVE_USER)    = do_remove_user,	/* remove_user 51 */
-	CALL(PM_UPDATE_PRIVILEGES) = do_update_privileges, /* update_privileges 52 */
-	CALL(PM_DELETE_MESSAGE) = do_delete_message, /* delete_message 53 */
-	CALL(PM_REMOVE_MAILBOX) = do_remove_mailbox /* remove_mailbox */
+	CALL(PM_UPDATE_PRIVILEGES) = do_update_privileges, /* update_privileges */
+	CALL(PM_DELETE_MESSAGE) = do_delete_message,
+	CALL(PM_REMOVE_MAILBOX) = do_remove_mailbox, /* remove_mailbox */
+	CALL(PM_ADD_SENDER) = do_add_sender,
+	CALL(PM_ADD_RECEIVER) = do_add_receiver,
+	CALL(PM_REMOVE_SENDER) = do_remove_sender,
+	CALL(PM_REMOVE_RECEIVER) = do_remove_receiver
 };

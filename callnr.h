@@ -65,11 +65,15 @@
 #define PM_ADD_USER             (PM_BASE + 49) //add user to user list
 #define PM_ADD_MAILBOX          (PM_BASE + 50) //add mailbox to mailbox_collection
 #define PM_REMOVE_USER		(PM_BASE + 51)
-#define PM_UPDATE_PRIVILEGES    (PM_BASE + 52)
-#define PM_DELETE_MESSAGE       (PM_BASE + 53)
+#define PM_UPDATE_PRIVILEGES (PM_BASE + 52)
+#define PM_DELETE_MESSAGE (PM_BASE + 53)
 #define PM_REMOVE_MAILBOX       (PM_BASE + 54)
+#define PM_ADD_SENDER (PM_BASE + 55)
+#define PM_ADD_RECEIVER (PM_BASE + 56)
+#define PM_REMOVE_SENDER (PM_BASE + 57)
+#define PM_REMOVE_RECEIVER (PM_BASE + 58)
 
-#define NR_PM_CALLS		55	/* highest number from base plus one */
+#define NR_PM_CALLS		59	/* highest number from base plus one */
 
 /*===========================================================================*
  *				Calls to VFS				     *
