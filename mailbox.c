@@ -405,20 +405,36 @@ int do_remove_mailbox(){
   }
 
   mailbox_t *head = mailbox_collection->head->next;
+  int mailbox_found = 0;
+
   while (strcmp(head->mailbox_name, "HEAD") != 0) {
+	  printf("+kernel debug: mailbox_name is %s\n", head->mailbox_name);
     if (strcmp(head->mailbox_name, mailbox_name) == 0){
       head->prev->next = head->next;
       head->next->prev = head->prev;
 
+      printf("+kernel debug: mailbox %s deleted\n", head->mailbox_name);
       free(head);
+      mailbox_found = 1;
       mailbox_collection->number_of_mailboxes--;
     }
 
     head = head->next;
   }
 
-  return OK;
+  if (mailbox_found)
+  {
+	  printf("Mailbox: Mailbox %s removed\n", mailbox_name);
+	  return OK;
+  }
+  else
+  {
+	  printf("Mailbox: Mailbox %s does not exist\n", mailbox_name);
+	  return ERROR;
+  }
 }
+
+
 /* Creates mailbox if there is none
  * Add message to mailbox (if mailbox is not full)
  * Returns OK if message was successfully added
