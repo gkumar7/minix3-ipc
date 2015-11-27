@@ -85,7 +85,7 @@ int add_mailbox(int mailbox_type, char *mailbox_name, char *send_access, char *r
   int receive_access_len = strlen(receive_access);
 
   char *mailbox_type_buf = malloc(snprintf(NULL, 0, "%d", mailbox_type) + 1);
-  snprintf(mailbox_type_buf, "%d", mailbox_type);
+  sprintf(mailbox_type_buf, "%d", mailbox_type);
 
   // Concatenate lengths of send and receive into a char *
   char *buf1 = malloc(snprintf(NULL, 0, "%d", send_access_len) + 1);

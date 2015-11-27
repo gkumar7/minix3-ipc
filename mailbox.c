@@ -214,6 +214,10 @@ int mailboxExists(char *mailbox_name) {
 
 /* Check to make sure user has correct privileges to create the mailbox */
 int create_mailbox_privileges(int uid){
+  if (!users){
+    init_users();
+  }
+
   uid_node_t *head = users->next;
 
   while (head->uid != -1){
@@ -278,9 +282,9 @@ int create_list(char *access_list_str, uid_node_t *access_list) {
 
       access_list->prev->next = new_uid;
       access_list->prev = new_uid;
-
-      access_p = strtok(NULL, delim);
     }
+
+    access_p = strtok(NULL, delim);
   }
   return OK;
 }
