@@ -6,7 +6,7 @@
 	clang receive_message.c -o receive_message
 	clang remove_users.c -o remove_users
 	clang send_message.c -o send_message
-
+	clang remove_mailbox.c -o remove_mailbox
 
   clean: 
 	  $(RM) myprog

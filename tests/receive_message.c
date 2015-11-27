@@ -17,13 +17,14 @@ int main(int argc, char* argv[])
 	size_t bufferSize;
 	int recipient;
 
-	if (receive_message(destBuffer, bufferSize, recipient) == ERROR)
+	if (receive_message(destBuffer, bufferSize) == ERROR)
 	{
 		printf("*Error when creating mailbox");
+	}
+	else
+	{
+		printf("+Message received. The content of the message is %s\n", destBuffer);
 	}
 
 	return 0;
 }
-
-
-//int receive_message(char *destBuffer, size_t bufferSize, int recipient)

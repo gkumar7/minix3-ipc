@@ -13,9 +13,16 @@ int main(int argc, char* argv[])
 {
 
 	/* Modify call manually */
-	if (delete_message("mailboxTest", "hello_world") == ERROR)
+	char *mailboxName = "mailboxTest";
+	char *messageName = "hello_world";
+
+	if (delete_message(mailboxName, messageName) == ERROR)
 	{
-		printf("*Error when creating mailbox");
+		printf("*Error when creating mailbox\n");
+	}
+	else
+	{
+		printf("+Message %s from mailbox %s has been deleted\n", mailboxName, messageName);
 	}
 
 	return 0;

@@ -21,7 +21,11 @@ int main(int argc, char* argv[])
 
 	if (add_mailbox(mailboxType, mailboxName, sendersPids, receiversPids) == ERROR)
 	{
-		printf("*Error when creating mailbox");
+		printf("*Error when creating mailbox\n");
+	}
+	else
+	{
+		printf("+Mailbox %s has been created successfully\n", mailboxName);
 	}
 
 	return 0;
