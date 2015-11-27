@@ -117,12 +117,13 @@ int remove_mailbox(char *mailbox_name){
 
 int send_message(char *mailbox_name,
                  char *message_subject,
-                 char *message_data,
-                 size_t mailboxNameLen,
-                 size_t subjectLen,
-                 size_t messageLen
+                 char *message_data
                  )
 {
+
+  size_t mailboxNameLen = strlen(mailbox_name);
+  size_t subjectLen = strlen(message_subject);
+  size_t messageLen = strlen(message_data);
 
 	//struct passwd *pwd = getpwnam(username);
 	message m;
