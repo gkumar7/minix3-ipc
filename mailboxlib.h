@@ -117,12 +117,13 @@ int remove_mailbox(char *mailbox_name){
 
 int send_message(char *mailbox_name,
                  char *message_subject,
-                 char *message_data,
-                 size_t mailboxNameLen,
-                 size_t subjectLen,
-                 size_t messageLen
+                 char *message_data
                  )
 {
+
+  size_t mailboxNameLen = strlen(mailbox_name);
+  size_t subjectLen = strlen(message_subject);
+  size_t messageLen = strlen(message_data);
 
 	//struct passwd *pwd = getpwnam(username);
 	message m;
@@ -140,16 +141,16 @@ int send_message(char *mailbox_name,
 
 
 
-int receive_message(char *destBuffer, size_t bufferSize, int recipient)
+int receive_message(char *destBuffer, size_t bufferSize)//, int recipient)
 {
 
 	//struct passwd *pwd = getpwnam(username);
 
   message m;
 	m.m1_p1 = destBuffer;
-	m.m1_i1 = recipient;
-	m.m1_i2 = (int) bufferSize;
-	m.m1_i3 = getuid();
+	//m.m1_i1 = recipient;
+	m.m1_i1 = (int) bufferSize;
+	m.m1_i2 = getuid();
 
 	int status = _syscall(PM_PROC_NR, PM_RETRIEVE, &m);
 	if (status == ERROR)

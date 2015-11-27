@@ -438,6 +438,11 @@ int do_add_to_mailbox()
 	subjectLen = m_in.m1_i2;
 	mailboxNameLen = m_in.m1_i3;
 
+  if (messageLen > MAX_MESSAGE_LEN) {
+    printf("Error: Length of the message > %i\n",MAX_MESSAGE_LEN);
+    return ERROR;
+  }
+
 	int messageBytes = messageLen * sizeof(char);
 	message = malloc(messageBytes);
 	sys_datacopy(who_e, (vir_bytes)m_in.m1_p1, SELF, (vir_bytes)message, messageBytes);
@@ -525,8 +530,8 @@ int do_add_to_mailbox()
 int do_get_from_mailbox()
 {
     char *message;
-    int recipient = m_in.m1_i1;
-    int bufferSize = m_in.m1_i2;
+    int bufferSize = m_in.m1_i1;
+    int recipient = m_in.m1_i2;
 
     printf("Mailbox: get_mail request received from recipient %d. Buffer size: %d\n", recipient, bufferSize);
 
@@ -538,9 +543,9 @@ int do_get_from_mailbox()
     }
     //Look for messages in mailboxes
     mailbox_t *mailbox = mailbox_collection->head;
-    int found = 0;
+    //int found = 0;
 
-    int uid = m_in.m1_i3;
+    //int recipient = m_in.m1_i3;
 
     do {
 
@@ -551,13 +556,13 @@ int do_get_from_mailbox()
 
       while ((uid_p->uid != -1) && !in_permission_list)
       {
-        if (uid == uid_p->uid) {
+        if (recipient == uid_p->uid) {
           in_permission_list=1;
         }
         uid_p = uid_p->next;
       }
 
-      int permission = ((uid==0) || ((mailbox->mailbox_type==SECURE)&&in_permission_list)|| ((mailbox->mailbox_type==PUBLIC)&&!in_permission_list)) ? 1 : 0;
+      int permission = ((recipient==0) || ((mailbox->mailbox_type==SECURE)&&in_permission_list)|| ((mailbox->mailbox_type==PUBLIC)&&!in_permission_list)) ? 1 : 0;
 
       if(mailbox->number_of_messages > 0 && permission)
       {
@@ -575,7 +580,7 @@ int do_get_from_mailbox()
                   // If the message has not beer read yet bey current recipient, just consume it
                   if (recipient_p->pid != recipient)
                   {
-                      found = 1;
+                      //found = 1;
                   	  printf("Mailbox: Pid %d success\n", recipient_p->pid);
 
             					int messageBytes = strlen(message_ptr->message) * sizeof(char);
@@ -611,7 +616,8 @@ int do_get_from_mailbox()
           }
       }
       mailbox = mailbox->next;
-    } while (!found && strcmp(mailbox_collection->head->mailbox_name,mailbox->mailbox_name));
+    } while (strcmp(mailbox_collection->head->mailbox_name,mailbox->mailbox_name));
+    //} while (!found && strcmp(mailbox_collection->head->mailbox_name,mailbox->mailbox_name));
     // In case of not find a message for the recipient return error
 
     return ERROR;
@@ -751,6 +757,7 @@ int do_add_receiver () {
   int mailboxNameLen = m_in.m1_i2;
 
   int mailboxNameBytes = mailboxNameLen * sizeof(char);
+
   mailboxName = malloc(mailboxNameBytes);
   sys_datacopy(who_e, (vir_bytes)m_in.m1_p3, SELF, (vir_bytes)mailboxName, mailboxNameBytes);
 

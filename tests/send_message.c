@@ -21,7 +21,8 @@ int main(int argc, char* argv[])
     size_t subjectLen = strlen(message_subject);
     size_t messageLen = strlen(message_data);
 
-	if (send_message (mailbox_name, message_subject, message_data, mailboxNameLen, subjectLen, messageLen));
+
+	if (send_message (mailbox_name, message_subject, message_data, mailboxNameLen, subjectLen, messageLen) == ERROR)
 	{
 		printf("*Error when creating mailbox");
 	}
