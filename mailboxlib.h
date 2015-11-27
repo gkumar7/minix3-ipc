@@ -164,4 +164,67 @@ int delete_message (char *mailbox_name, char *subject) {
 
 }
 
+int add_sender (char *mailbox_name,char *username) {
+  struct passwd *pwd = getpwnam(username);
+  int mailbox_name_len = strlen(mailbox_name);
+  if (pwd) {
+    message m;
+    m.m1_i1 = pwd->pw_uid;
+    m.m1_i2 = mailbox_name_len;
+    m.m1_p1 = mailbox_name;
+
+    return(_syscall(PM_PROC_NR, PM_ADD_SENDER, &m));
+  }
+  printf("Error: user does not exist.\n");
+  return ERROR;
+}
+
+int add_receiver (char *mailbox_name,char *username) {
+  struct passwd *pwd = getpwnam(username);
+  int mailbox_name_len = strlen(mailbox_name);
+
+  if (pwd) {
+    message m;
+    m.m1_i1 = pwd->pw_uid;
+    m.m1_i2 = mailbox_name_len;
+    m.m1_p1 = mailbox_name;
+
+    return(_syscall(PM_PROC_NR, PM_ADD_RECEIVER, &m));
+  }
+  printf("Error: user does not exist.\n");
+  return ERROR;
+}
+
+int remove_sender (char *mailbox_name,char *username) {
+  struct passwd *pwd = getpwnam(username);
+  int mailbox_name_len = strlen(mailbox_name);
+
+  if (pwd) {
+    message m;
+    m.m1_i1 = pwd->pw_uid;
+    m.m1_i2 = mailbox_name_len;
+    m.m1_p1 = mailbox_name;
+
+    return(_syscall(PM_PROC_NR, PM_REMOVE_SENDER, &m));
+  }
+  printf("Error: user does not exist.\n");
+  return ERROR;
+}
+
+int remove_receiver (char *mailbox_name,char *username) {
+  struct passwd *pwd = getpwnam(username);
+  int mailbox_name_len = strlen(mailbox_name);
+
+  if (pwd) {
+    message m;
+    m.m1_i1 = pwd->pw_uid;
+    m.m1_i2 = mailbox_name_len;
+    m.m1_p1 = mailbox_name;
+
+    return(_syscall(PM_PROC_NR, PM_REMOVE_RECEIVER, &m));
+  }
+  printf("Error: user does not exist.\n");
+  return ERROR;
+}
+
 #endif

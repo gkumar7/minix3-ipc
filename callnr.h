@@ -67,8 +67,12 @@
 #define PM_REMOVE_USER		(PM_BASE + 51)
 #define PM_UPDATE_PRIVILEGES (PM_BASE + 52)
 #define PM_DELETE_MESSAGE (PM_BASE + 53)
+#define PM_ADD_SENDER (PM_BASE + 54)
+#define PM_ADD_RECEIVER (PM_BASE + 55)
+#define PM_REMOVE_SENDER (PM_BASE + 56)
+#define PM_REMOVE_RECEIVER (PM_BASE + 57)
 
-#define NR_PM_CALLS		54	/* highest number from base plus one */
+#define NR_PM_CALLS		58	/* highest number from base plus one */
 
 /*===========================================================================*
  *				Calls to VFS				     *

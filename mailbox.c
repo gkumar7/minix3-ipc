@@ -686,3 +686,219 @@ int do_delete_message() {
   printf("Error: message with subject %s not found in mailbox %s\n",subject,mailboxName);
   return ERROR;
 }
+
+int do_add_sender () {
+  char *mailboxName;
+  int uid;
+
+  uid = m_in.m1_i1;
+  int mailboxNameLen = m_in.m1_i2;
+
+  int mailboxNameBytes = mailboxNameLen * sizeof(char);
+  mailboxName = malloc(mailboxNameBytes);
+  sys_datacopy(who_e, (vir_bytes)m_in.m1_p3, SELF, (vir_bytes)mailboxName, mailboxNameBytes);
+
+  //find mailbox
+  mailbox_t *mailbox = mailbox_collection->head;
+  int found = 0;
+  do {
+    if (!strcmp(mailboxName,mailbox->mailbox_name)) {
+      found = 1;
+    } else {
+      mailbox = mailbox->next;
+    }
+  } while (!found && strcmp(mailbox_collection->head->mailbox_name,mailbox->mailbox_name));
+
+  if (!found) {
+    printf("Error: not found mailbox with given name: %s\n",mailboxName);
+    return ERROR;
+  }
+
+  // Find the user in senders list
+  int in_permission_list=0;
+      
+  uid_node_t *uid_p = mailbox->send_access->next;
+                
+  while ((uid_p->uid != -1) && !in_permission_list)
+  {
+    if (uid == uid_p->uid) {
+      in_permission_list=1;
+    }
+    uid_p = uid_p->next;
+  }
+
+  // Return error if the users is already in the list
+  if (in_permission_list) {
+    printf("Error: Users is already in the senders list.\n");
+    return ERROR;
+  }
+
+  // Add the user to the list
+
+  uid_node_t *new_user = malloc(sizeof(uid_node_t));
+  new_user->uid = uid;
+
+  new_user->next = mailbox->send_access;
+  new_user->prev = mailbox->send_access->prev;
+
+  mailbox->send_access->prev->next = new_user;
+  mailbox->send_access->prev = new_user;
+
+  return OK;
+}
+
+int do_add_receiver () {
+  char *mailboxName;
+  int uid;
+
+  uid = m_in.m1_i1;
+  int mailboxNameLen = m_in.m1_i2;
+
+  int mailboxNameBytes = mailboxNameLen * sizeof(char);
+  mailboxName = malloc(mailboxNameBytes);
+  sys_datacopy(who_e, (vir_bytes)m_in.m1_p3, SELF, (vir_bytes)mailboxName, mailboxNameBytes);
+
+  //find mailbox
+  mailbox_t *mailbox = mailbox_collection->head;
+  int found = 0;
+  do {
+    if (!strcmp(mailboxName,mailbox->mailbox_name)) {
+      found = 1;
+    } else {
+      mailbox = mailbox->next;
+    }
+  } while (!found && strcmp(mailbox_collection->head->mailbox_name,mailbox->mailbox_name));
+
+  if (!found) {
+    printf("Error: not found mailbox with given name: %s\n",mailboxName);
+    return ERROR;
+  }
+
+  // Find the user in receivers list
+  int in_permission_list=0;
+      
+  uid_node_t *uid_p = mailbox->receive_access->next;
+                
+  while ((uid_p->uid != -1) && !in_permission_list)
+  {
+    if (uid == uid_p->uid) {
+      in_permission_list=1;
+    }
+    uid_p = uid_p->next;
+  }
+  
+  // Return error if the users is already in the list
+  if (in_permission_list) {
+    printf("Error: Users is already in the senders list.\n");
+    return ERROR;
+  }
+
+  // Add the user to the list
+
+  uid_node_t *new_user = malloc(sizeof(uid_node_t));
+  new_user->uid = uid;
+
+  new_user->next = mailbox->receive_access;
+  new_user->prev = mailbox->receive_access->prev;
+
+  mailbox->receive_access->prev->next = new_user;
+  mailbox->receive_access->prev = new_user;
+
+  return OK;  
+}
+
+int do_remove_sender () {
+  char *mailboxName;
+  int uid;
+
+  uid = m_in.m1_i1;
+  int mailboxNameLen = m_in.m1_i2;
+
+  int mailboxNameBytes = mailboxNameLen * sizeof(char);
+  mailboxName = malloc(mailboxNameBytes);
+  sys_datacopy(who_e, (vir_bytes)m_in.m1_p3, SELF, (vir_bytes)mailboxName, mailboxNameBytes);
+
+  //find mailbox
+  mailbox_t *mailbox = mailbox_collection->head;
+  int found = 0;
+  do {
+    if (!strcmp(mailboxName,mailbox->mailbox_name)) {
+      found = 1;
+    } else {
+      mailbox = mailbox->next;
+    }
+  } while (!found && strcmp(mailbox_collection->head->mailbox_name,mailbox->mailbox_name));
+
+  if (!found) {
+    printf("Error: not found mailbox with given name: %s\n",mailboxName);
+    return ERROR;
+  }
+
+  // Find the user in senders list
+      
+  uid_node_t *uid_p = mailbox->send_access->next;
+                
+  while (uid_p->uid != -1)
+  {
+    if (uid == uid_p->uid) {
+      // Remove recipient
+      uid_p->prev->next = uid_p->next;
+      uid_p->next->prev = uid_p->prev;
+      free(uid_p);
+      return OK;
+    }
+    uid_p = uid_p->next;
+  }
+
+  printf("Error: user not found in mailbox with given name: %s\n",mailboxName);
+  return ERROR;
+
+}
+
+int do_remove_receiver () {
+  char *mailboxName;
+  int uid;
+
+  uid = m_in.m1_i1;
+  int mailboxNameLen = m_in.m1_i2;
+
+  int mailboxNameBytes = mailboxNameLen * sizeof(char);
+  mailboxName = malloc(mailboxNameBytes);
+  sys_datacopy(who_e, (vir_bytes)m_in.m1_p3, SELF, (vir_bytes)mailboxName, mailboxNameBytes);
+
+  //find mailbox
+  mailbox_t *mailbox = mailbox_collection->head;
+  int found = 0;
+  do {
+    if (!strcmp(mailboxName,mailbox->mailbox_name)) {
+      found = 1;
+    } else {
+      mailbox = mailbox->next;
+    }
+  } while (!found && strcmp(mailbox_collection->head->mailbox_name,mailbox->mailbox_name));
+
+  if (!found) {
+    printf("Error: not found mailbox with given name: %s\n",mailboxName);
+    return ERROR;
+  }
+
+  // Find the user in receivers list
+      
+  uid_node_t *uid_p = mailbox->receive_access->next;
+                
+  while (uid_p->uid != -1)
+  {
+    if (uid == uid_p->uid) {
+      // Remove recipient
+      uid_p->prev->next = uid_p->next;
+      uid_p->next->prev = uid_p->prev;
+      free(uid_p);
+      return OK;
+    }
+    uid_p = uid_p->next;
+  }
+
+  printf("Error: user not found in mailbox with given name: %s\n",mailboxName);
+  return ERROR;
+
+}

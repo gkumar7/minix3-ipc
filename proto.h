@@ -102,3 +102,8 @@ int do_update_privileges();
 int add_to_mailbox();
 int get_from_mailbox();
 int do_delete_message();
+
+int do_add_sender();
+int do_add_receiver();
+int do_remove_sender();
+int do_remove_receiver();
