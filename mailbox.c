@@ -22,6 +22,7 @@ int init_users(){
 
   // add superuser to users list
   uid_node_t *superuser = malloc(sizeof(uid_node_t));
+  superuser->uid = 0;
   superuser->privileges = 0b1111;
   superuser->prev = users;
   superuser->next = users;
@@ -234,6 +235,19 @@ int create_mailbox_privileges(int uid){
   return 0;
 }
 
+/* Debugging */
+int print_access_list(uid_node_t *access_list){
+  uid_node_t *head = access_list->next;
+  while (head->uid != -1){
+    printf("%d", head->uid);
+
+    head = head->next;
+  }
+  printf("NULL\n");
+
+  return OK;
+}
+
 int init_uid_access_list(uid_node_t *access_list) {
   // Sentinel value
   access_list = malloc(sizeof(uid_node_t));
@@ -241,7 +255,6 @@ int init_uid_access_list(uid_node_t *access_list) {
 
   access_list->prev = access_list;
   access_list->next = access_list;
-
   return OK;
 }
 
@@ -267,7 +280,6 @@ int create_list(char *access_list_str, uid_node_t *access_list) {
   int uid = atoi(access_p);
 
   while (access_p != NULL){
-    uid_node_t *new_uid = malloc(sizeof(uid_node_t));
     int privileges = get_privileges_for_user(uid);
     if (privileges == ERROR) {
       // Skip this user
@@ -275,6 +287,8 @@ int create_list(char *access_list_str, uid_node_t *access_list) {
     }
     else {
       // If privileges were found (user exists)
+      uid_node_t *new_uid = malloc(sizeof(uid_node_t));
+      new_uid->uid = uid;
       new_uid->privileges = privileges;
 
       new_uid->next = access_list;
@@ -703,9 +717,9 @@ int do_add_sender () {
 
   // Find the user in senders list
   int in_permission_list=0;
-      
+
   uid_node_t *uid_p = mailbox->send_access->next;
-                
+
   while ((uid_p->uid != -1) && !in_permission_list)
   {
     if (uid == uid_p->uid) {
@@ -763,9 +777,9 @@ int do_add_receiver () {
 
   // Find the user in receivers list
   int in_permission_list=0;
-      
+
   uid_node_t *uid_p = mailbox->receive_access->next;
-                
+
   while ((uid_p->uid != -1) && !in_permission_list)
   {
     if (uid == uid_p->uid) {
@@ -773,7 +787,7 @@ int do_add_receiver () {
     }
     uid_p = uid_p->next;
   }
-  
+
   // Return error if the users is already in the list
   if (in_permission_list) {
     printf("Error: Users is already in the senders list.\n");
@@ -791,7 +805,7 @@ int do_add_receiver () {
   mailbox->receive_access->prev->next = new_user;
   mailbox->receive_access->prev = new_user;
 
-  return OK;  
+  return OK;
 }
 
 int do_remove_sender () {
@@ -822,9 +836,9 @@ int do_remove_sender () {
   }
 
   // Find the user in senders list
-      
+
   uid_node_t *uid_p = mailbox->send_access->next;
-                
+
   while (uid_p->uid != -1)
   {
     if (uid == uid_p->uid) {
@@ -870,9 +884,9 @@ int do_remove_receiver () {
   }
 
   // Find the user in receivers list
-      
+
   uid_node_t *uid_p = mailbox->receive_access->next;
-                
+
   while (uid_p->uid != -1)
   {
     if (uid == uid_p->uid) {

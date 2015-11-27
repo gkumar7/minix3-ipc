@@ -16,8 +16,8 @@ int main(int argc, char* argv[])
 	/* Modify call manually */
 	int mailboxType = 0;
 	char *mailboxName = "mailboxTest";
-	char *sendersPids = "0 1000 1001";
-	char *receiversPids = "0 1002 1003";
+	char *sendersPids = "1000 1001";
+	char *receiversPids = "1002 1003";
 
 	if (add_mailbox(mailboxType, mailboxName, sendersPids, receiversPids) == ERROR)
 	{
