@@ -454,18 +454,26 @@ int do_add_to_mailbox()
 	subjectLen = m_in.m1_i2;
 	mailboxNameLen = m_in.m1_i3;
 
+  printf("Add to Mailbox - Debug line %d\n",1);
+
   if (messageLen > MAX_MESSAGE_LEN) {
-    printf("Error: Length of the message > %i\n",MAX_MESSAGE_LEN);
+    printf("Error: Length of the message > %d\n",MAX_MESSAGE_LEN);
     return ERROR;
   }
+
+  printf("Add to Mailbox - Debug line %d\n",2);
 
 	int messageBytes = messageLen * sizeof(char);
 	message = malloc(messageBytes);
 	sys_datacopy(who_e, (vir_bytes)m_in.m1_p1, SELF, (vir_bytes)message, messageBytes);
 
+  printf("Add to Mailbox - Debug line %d\n",3);
+
 	int subjectBytes = subjectLen * sizeof(char);
 	subject = malloc(subjectBytes);
 	sys_datacopy(who_e, (vir_bytes)m_in.m1_p2, SELF, (vir_bytes)subject, subjectBytes);
+
+  printf("Add to Mailbox - Debug line %d\n",4);
 
 	printf("Mailbox: New message received. Subject with %d bytes: %s,message content with %d bytes: %s\n",subjectBytes,subject,messageBytes, message);
 
@@ -473,16 +481,21 @@ int do_add_to_mailbox()
   mailboxName = malloc(mailboxNameBytes);
   sys_datacopy(who_e, (vir_bytes)m_in.m1_p3, SELF, (vir_bytes)mailboxName, mailboxNameBytes);
 
+  printf("Add to Mailbox - Debug line %d\n",5);
+
   // search mailbox by name, if it does not exist -> Error
   // store mailbox pointer in mailbox var
 
   mailbox_t *mailbox = mailbox_collection->head;
+  printf("Add to Mailbox - Debug line %d\n",6);
   int found = 0;
   do {
     if (!strcmp(mailboxName,mailbox->mailbox_name)) {
+      printf("Add to Mailbox - Debug line %d\n a",6);
       found = 1;
     } else {
       mailbox = mailbox->next;
+      printf("Add to Mailbox - Debug line %d\n b",6);
     }
   } while (!found && strcmp(mailbox_collection->head->mailbox_name,mailbox->mailbox_name));
 
@@ -491,42 +504,60 @@ int do_add_to_mailbox()
     return ERROR;
   }
 
+  printf("Add to Mailbox - Debug line %d\n",7);
+
   // Permission to write?
 
   int uid = (int) m_in.m1_ull1;
+
+  printf("Add to Mailbox - Debug line %d\n",8);
+
   int in_permission_list=0;
 
   uid_node_t *uid_p = mailbox->send_access->next;
 
+  printf("Add to Mailbox - Debug line %d\n",9);
+
   while ((uid_p->uid != -1) && !in_permission_list)
   {
+    printf("Add to Mailbox - Debug line %d\n",10);
     if (uid == uid_p->uid) {
+      printf("Add to Mailbox - Debug line %d a\n",11);
       in_permission_list=1;
     }
     uid_p = uid_p->next;
+    printf("Add to Mailbox - Debug line %d\n",12);
   }
 
   int permission = ((uid==0) || ((mailbox->mailbox_type==SECURE)&&in_permission_list)|| ((mailbox->mailbox_type==PUBLIC)&&!in_permission_list)) ? 1 : 0;
+
+  printf("Add to Mailbox - Debug line %d\n",13);
 
   if (!permission) {
     printf("The user is not allowed to write in the specified mailbox\n");
     return ERROR;
   }
 
+  printf("Add to Mailbox - Debug line %d\n",14);
+
 	if (mailbox->number_of_messages < MAX_MESSAGE_COUNT)
 	{
+    printf("Add to Mailbox - Debug line %d\n",15);
 	  message_t *new_message = malloc(sizeof(message_t));
-
+    printf("Add to Mailbox - Debug line %d\n",16);
     new_message->message = message;
     new_message->subject = subject;
+    printf("Add to Mailbox - Debug line %d\n",17);
 
 	  new_message->next = mailbox->head;
 	  new_message->prev = mailbox->head->prev;
-
+    printf("Add to Mailbox - Debug line %d\n",18);
 	  mailbox->head->prev->next = new_message;
 	  mailbox->head->prev = new_message;
+    printf("Add to Mailbox - Debug line %d\n",19);
 
 	  mailbox->number_of_messages += 1;
+    printf("Add to Mailbox - Debug line %d\n",20);
 
 	  printf("Mailbox: Current amount of messages in mailbox: %d\n", mailbox->number_of_messages);
 	}
@@ -712,17 +743,27 @@ int do_add_sender () {
   uid = m_in.m1_i1;
   int mailboxNameLen = m_in.m1_i2;
 
+  printf("do_add_sender - Debug line %d\n",1);
+
   int mailboxNameBytes = mailboxNameLen * sizeof(char);
   mailboxName = malloc(mailboxNameBytes);
   sys_datacopy(who_e, (vir_bytes)m_in.m1_p3, SELF, (vir_bytes)mailboxName, mailboxNameBytes);
-
+  
+  printf("do_add_sender - Debug line %d\n",2);
+  
   //find mailbox
   mailbox_t *mailbox = mailbox_collection->head;
+
+  printf("do_add_sender - Debug line %d\n",3);
+
   int found = 0;
   do {
+    printf("do_add_sender - Debug line %d\n",4);
     if (!strcmp(mailboxName,mailbox->mailbox_name)) {
+      printf("do_add_sender - Debug line %d a\n",5);
       found = 1;
     } else {
+      printf("do_add_sender - Debug line %d b\n",5);
       mailbox = mailbox->next;
     }
   } while (!found && strcmp(mailbox_collection->head->mailbox_name,mailbox->mailbox_name));
@@ -732,16 +773,23 @@ int do_add_sender () {
     return ERROR;
   }
 
+  printf("do_add_sender - Debug line %d\n",6);
+
   // Find the user in senders list
   int in_permission_list=0;
 
   uid_node_t *uid_p = mailbox->send_access->next;
 
+  printf("do_add_sender - Debug line %d\n",7);
+
   while ((uid_p->uid != -1) && !in_permission_list)
   {
+    printf("do_add_sender - Debug line %d\n",8);
     if (uid == uid_p->uid) {
+      printf("do_add_sender - Debug line %d\n",9);
       in_permission_list=1;
     }
+    printf("do_add_sender - Debug line %d\n",10);
     uid_p = uid_p->next;
   }
 
@@ -750,17 +798,24 @@ int do_add_sender () {
     printf("Error: Users is already in the senders list.\n");
     return ERROR;
   }
+  printf("do_add_sender - Debug line %d\n",11);
 
   // Add the user to the list
 
   uid_node_t *new_user = malloc(sizeof(uid_node_t));
   new_user->uid = uid;
 
+  printf("do_add_sender - Debug line %d\n",12);
+
   new_user->next = mailbox->send_access;
   new_user->prev = mailbox->send_access->prev;
 
+  printf("do_add_sender - Debug line %d\n",13);
+
   mailbox->send_access->prev->next = new_user;
   mailbox->send_access->prev = new_user;
+
+  printf("do_add_sender - Debug line %d\n",14);
 
   return OK;
 }
