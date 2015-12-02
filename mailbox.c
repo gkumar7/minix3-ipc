@@ -151,7 +151,7 @@ int do_update_privileges()
 
   user_to_update->privileges = privileges;
 
-  printf("Mailbox: Privileges of user with uid %d have been updated\n", user_to_update->uid);
+  printf("Mailbox: Privileges of user with uid %d have been updated to %d\n", user_to_update->uid, privileges);
 
   return OK;
 }
@@ -447,6 +447,7 @@ int do_remove_mailbox(){
   int mailbox_name_len = m_in.m1_i2;
 
   int mailbox_name_bytes = mailbox_name_len * sizeof(char);
+  mailbox_name = malloc(mailbox_name_bytes);
   sys_datacopy(who_e, (vir_bytes)m_in.m1_p1, SELF, (vir_bytes)mailbox_name, mailbox_name_bytes);
 
   if (!mailbox_collection) {
