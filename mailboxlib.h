@@ -195,8 +195,9 @@ int add_sender (char *mailbox_name,char *username) {
   int mailbox_name_len = strlen(mailbox_name) + 1;
   if (pwd) {
     message m;
-    m.m1_i1 = pwd->pw_uid;
-    m.m1_i2 = mailbox_name_len;
+    m.m1_i1 = getuid();
+    m.m1_i2 = pwd->pw_uid;
+    m.m1_i3 = mailbox_name_len;
     m.m1_p1 = mailbox_name;
 
     return(_syscall(PM_PROC_NR, PM_ADD_SENDER, &m));

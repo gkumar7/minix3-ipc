@@ -800,8 +800,9 @@ int do_delete_message() {
 
 int do_add_sender () {
   char *mailboxName;
-  int uid = m_in.m1_i1;
-  int mailboxNameLen = m_in.m1_i2;
+  int caller_uid = m_in.m1_i1;
+  int uid = m_in.m1_i2;
+  int mailboxNameLen = m_in.m1_i3;
 
   int mailboxNameBytes = mailboxNameLen * sizeof(char);
   mailboxName = malloc(mailboxNameBytes);
@@ -811,7 +812,7 @@ int do_add_sender () {
   mailbox_t *mailbox = mailbox_collection->head->next;
 
   int found = 0;
-  while (strcmp(mailbox->mailbox_name, "HEAD") != 0){
+  while (strcmp(mailbox->mailbox_name, "HEAD") != 0 && !found){
     if (strcmp(mailbox->mailbox_name, mailboxName) == 0) {
       found = 1;
     } else {
@@ -825,7 +826,7 @@ int do_add_sender () {
   }
 
   // Check to make sure that the current user is the owner of this mailbox
-  if (mailbox->owner != uid) {
+  if (mailbox->owner != caller_uid) {
     printf("Mailbox: user with uid %d is not the owner of mailbox %s\n", uid, mailbox->mailbox_name);
     return ERROR;
   }
@@ -860,6 +861,7 @@ int do_add_sender () {
   mailbox->send_access->prev->next = new_user;
   mailbox->send_access->prev = new_user;
 
+  printf("Added user with uid %d to the senders list of mailbox %s\n", uid, mailbox->mailbox_name);
   return OK;
 }
 
