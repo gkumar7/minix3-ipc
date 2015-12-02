@@ -57,9 +57,13 @@ int do_show_mailboxes(){
     printf("Number of messages: %d\n", head->number_of_messages);
     printf("Type: %d\n", head->mailbox_type);
     printf("Name: %s\n", head->mailbox_name);
+
     printf("send_access: ");
     print_access_list(head->send_access);
+
+    printf("receive_access: ");
     print_access_list(head->receive_access);
+
     printf("messages: ");
     print_messages_of_mailbox(head->head);
 
@@ -314,9 +318,9 @@ int create_list(char *access_list_str, uid_node_t *access_list) {
 
   const char delim[2] = " ";
   char *access_p = strtok(access_list_str, delim);
-  int uid = atoi(access_p);
 
   while (access_p != NULL){
+    int uid = atoi(access_p);
     int privileges = get_privileges_for_user(uid);
     if (privileges == ERROR) {
       // Skip this user
