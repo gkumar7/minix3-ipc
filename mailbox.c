@@ -40,10 +40,10 @@ int print_access_list(uid_node_t *access_list){
 
 int print_messages_of_mailbox(message_t *head){
   message_t *iter = head->next;
-  while (strcmp(head->message, "HEAD") != 0) {
-    printf("%s->", head->message);
+  while (strcmp(iter->message, "HEAD") != 0) {
+    printf("%s->", iter->message);
 
-    head = head->next;
+    iter = iter->next;
   }
   printf("NULL\n");
   return OK;
@@ -516,7 +516,12 @@ int do_add_to_mailbox()
   message = malloc(messageBytes);
   sys_datacopy(who_e, (vir_bytes)m_in.m1_p1, SELF, (vir_bytes)message, messageBytes);
 
-  printf("Add to Mailbox - Debug line %d\n",3);
+  printf("Add to Mailbox - Debug line %d, Message: %s\n",3,message);
+
+  if (subjectLen > MAX_SUBJECT_LEN) {
+    printf("Error: Length of the subject > %d\n",MAX_SUBJECT_LEN);
+    return ERROR;
+  }
 
   int subjectBytes = subjectLen * sizeof(char);
   subject = malloc(subjectBytes);
