@@ -304,7 +304,7 @@ int get_privileges_for_user(int uid) {
   return ERROR;
 }
 
-uid_node_t* create_list(char *access_list_str, uid_node_t *access_list) {
+int create_list(char *access_list_str, uid_node_t *access_list) {
 
   // Initialize access_list
   access_list->uid = -1;
