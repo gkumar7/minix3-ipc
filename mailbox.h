@@ -49,7 +49,7 @@ typedef struct pid_node {
  */
 
 typedef struct message_struct {
-    pid_node_t *recipients;
+    uid_node_t *recipients;
     char *message;
     char *subject;
     struct message_struct *prev;
