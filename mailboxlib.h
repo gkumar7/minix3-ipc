@@ -161,7 +161,7 @@ int receive_message(char *destBuffer, size_t bufferSize)//, int recipient)
   message m;
 	m.m1_p1 = destBuffer;
 	//m.m1_i1 = recipient;
-	m.m1_i1 = (int) bufferSize;
+	m.m1_i1 = (int) bufferSize + 1;
 	m.m1_i2 = getuid();
 
 	int status = _syscall(PM_PROC_NR, PM_RETRIEVE, &m);
