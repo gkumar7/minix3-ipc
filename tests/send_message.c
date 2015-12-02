@@ -16,11 +16,7 @@ int main(int argc, char* argv[])
 
 	char* mailbox_name = "mailboxTest";
 	char* message_subject = "messageTestSubject";
-    char* message_data = "This is the content of the message";
-    size_t mailboxNameLen = strlen(mailbox_name);
-    size_t subjectLen = strlen(message_subject);
-    size_t messageLen = strlen(message_data);
-
+	char* message_data = "This is the content of the message";
 
 	if (send_message (mailbox_name, message_subject, message_data) == ERROR)
 	{

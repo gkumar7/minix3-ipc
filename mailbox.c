@@ -13,6 +13,61 @@ static mailbox_t *mailbox;
 
 /* Project 3 */
 
+/* Debug syshandlers */
+int do_show_users() {
+  uid_node_t *head = users->next;
+  printf("Current user list: \n");
+  while (head->uid != -1) {
+    printf("%d->", head->uid);
+    head = head->next;
+  }
+  printf("NULL\n");
+
+  return OK;
+}
+
+int print_access_list(uid_node_t *access_list){
+  uid_node_t *head = access_list->next;
+  while (head->uid != -1){
+    printf("%d->", head->uid);
+
+    head = head->next;
+  }
+  printf("NULL\n");
+
+  return OK;
+}
+
+int print_messages_of_mailbox(message_t *head){
+  message_t *iter = head->next;
+  while (strcmp(head->message, "HEAD") != 0) {
+    printf("%s->", head->message);
+
+    head = head->next;
+  }
+  printf("NULL\n");
+  return OK;
+}
+
+int do_show_mailboxes(){
+  mailbox_t *head = mailbox_collection->head->next;
+  printf("Mailboxes:\n");
+  while (strcmp(head->mailbox_name, "HEAD") != 0){
+    printf("Owner: %d\n", head->owner);
+    printf("Number of messages: %d\n", head->number_of_messages);
+    printf("Type: %d\n", head->mailbox_type);
+    printf("Name: %s\n", head->mailbox_name);
+    printf("send_access: ");
+    print_access_list(head->send_access);
+    print_access_list(head->receive_access);
+    printf("messages: ");
+    print_messages_of_mailbox(head->head);
+  }
+  return OK;
+}
+
+/* Main syshandlers */
+
 /* Initialize users list */
 int init_users(){
 
@@ -233,19 +288,6 @@ int create_mailbox_privileges(int uid){
 
   // User does not exist or does not have correct privileges
   return 0;
-}
-
-/* Debugging */
-int print_access_list(uid_node_t *access_list){
-  uid_node_t *head = access_list->next;
-  while (head->uid != -1){
-    printf("%d", head->uid);
-
-    head = head->next;
-  }
-  printf("NULL\n");
-
-  return OK;
 }
 
 int get_privileges_for_user(int uid) {

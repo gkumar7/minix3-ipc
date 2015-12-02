@@ -16,6 +16,18 @@
 #define ERROR -1
 
 
+/* Debug System Calls */
+int show_users() {
+  message m;
+  return(_syscall(PM_PROC_NR, PM_SHOW_USERS, &m));
+}
+
+int show_mailboxes() {
+  message m;
+  return(_syscall(PM_PROC_NR, PM_SHOW_MAILBOXES, &m));
+}
+
+/* Main System Calls */
 int update_privileges(char *username, int privileges)
 {
 	// Get UID for user (also check if user exists)
@@ -121,9 +133,9 @@ int send_message(char *mailbox_name,
                  )
 {
 
-  size_t mailboxNameLen = strlen(mailbox_name);
-  size_t subjectLen = strlen(message_subject);
-  size_t messageLen = strlen(message_data);
+  size_t mailboxNameLen = strlen(mailbox_name) + 1;
+  size_t subjectLen = strlen(message_subject) + 1;
+  size_t messageLen = strlen(message_data) + 1;
 
 	//struct passwd *pwd = getpwnam(username);
 	message m;

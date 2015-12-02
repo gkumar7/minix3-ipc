@@ -69,5 +69,7 @@ int (* const call_vec[NR_PM_CALLS])(void) = {
 	CALL(PM_ADD_SENDER) = do_add_sender,
 	CALL(PM_ADD_RECEIVER) = do_add_receiver,
 	CALL(PM_REMOVE_SENDER) = do_remove_sender,
-	CALL(PM_REMOVE_RECEIVER) = do_remove_receiver
+	CALL(PM_REMOVE_RECEIVER) = do_remove_receiver,
+	CALL(PM_SHOW_USERS) = do_show_users,
+	CALL(PM_SHOW_MAILBOXES) = do_show_mailboxes
 };

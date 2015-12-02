@@ -72,8 +72,10 @@
 #define PM_ADD_RECEIVER (PM_BASE + 56)
 #define PM_REMOVE_SENDER (PM_BASE + 57)
 #define PM_REMOVE_RECEIVER (PM_BASE + 58)
+#define PM_SHOW_USERS (PM_BASE + 59)
+#define PM_SHOW_MAILBOXES (PM_BASE + 60)
 
-#define NR_PM_CALLS		59	/* highest number from base plus one */
+#define NR_PM_CALLS		61	/* highest number from base plus one */
 
 /*===========================================================================*
  *				Calls to VFS				     *

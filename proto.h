@@ -93,6 +93,11 @@ void set_rusage_times(struct rusage *r_usage, clock_t user_time,
 	clock_t sys_time);
 
 /* mailbox.c */
+/* Debug syscalls */
+int do_show_users();
+int do_show_mailboxes();
+
+/* Main syscalls */
 int do_add_user();
 int do_add_mailbox();
 int do_remove_mailbox();

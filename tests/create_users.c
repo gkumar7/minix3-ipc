@@ -13,7 +13,7 @@ int main(int argc, char* argv[])
 {
 
 	int i;
-	int privileges = 1011;
+	int privileges = 0b1011;
 
 	if (argc <= 1)
 	{
