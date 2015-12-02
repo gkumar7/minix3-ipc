@@ -208,12 +208,13 @@ int add_sender (char *mailbox_name,char *username) {
 
 int add_receiver (char *mailbox_name,char *username) {
   struct passwd *pwd = getpwnam(username);
-  int mailbox_name_len = strlen(mailbox_name);
+  int mailbox_name_len = strlen(mailbox_name) + 1;
 
   if (pwd) {
     message m;
-    m.m1_i1 = pwd->pw_uid;
-    m.m1_i2 = mailbox_name_len;
+    m.m1_i1 = getuid();
+    m.m1_i2 = pwd->pw_uid;
+    m.m1_i3 = mailbox_name_len;
     m.m1_p1 = mailbox_name;
 
     return(_syscall(PM_PROC_NR, PM_ADD_RECEIVER, &m));
@@ -224,12 +225,13 @@ int add_receiver (char *mailbox_name,char *username) {
 
 int remove_sender (char *mailbox_name,char *username) {
   struct passwd *pwd = getpwnam(username);
-  int mailbox_name_len = strlen(mailbox_name);
+  int mailbox_name_len = strlen(mailbox_name) + 1;
 
   if (pwd) {
     message m;
-    m.m1_i1 = pwd->pw_uid;
-    m.m1_i2 = mailbox_name_len;
+    m.m1_i1 = getuid();
+    m.m1_i2 = pwd->pw_uid;
+    m.m1_i3 = mailbox_name_len;
     m.m1_p1 = mailbox_name;
 
     return(_syscall(PM_PROC_NR, PM_REMOVE_SENDER, &m));
@@ -240,12 +242,13 @@ int remove_sender (char *mailbox_name,char *username) {
 
 int remove_receiver (char *mailbox_name,char *username) {
   struct passwd *pwd = getpwnam(username);
-  int mailbox_name_len = strlen(mailbox_name);
+  int mailbox_name_len = strlen(mailbox_name) + 1;
 
   if (pwd) {
     message m;
-    m.m1_i1 = pwd->pw_uid;
-    m.m1_i2 = mailbox_name_len;
+    m.m1_i1 = getuid();
+    m.m1_i2 = pwd->pw_uid;
+    m.m1_i3 = mailbox_name_len;
     m.m1_p1 = mailbox_name;
 
     return(_syscall(PM_PROC_NR, PM_REMOVE_RECEIVER, &m));
