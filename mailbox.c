@@ -691,14 +691,13 @@ int do_get_from_mailbox()
                   }
               }
               if (!already_read) {
-    
+
                 printf("Mailbox: uid %d success\n", recipient_p->uid);
 
-                int messageBytes = strlen(message_ptr->message) * sizeof(char);
+                int messageBytes = (strlen(message_ptr->message) + 1) * sizeof(char);
                 // Copy the content of the message
 
                 sys_datacopy(SELF, (vir_bytes)message_ptr->message, who_e, (vir_bytes)m_in.m1_p1, messageBytes);
-                printf("Mailbox: Message obtained is %s\n", m_in.m1_p1);
 
                 // Add recipient (received message notification)
 
