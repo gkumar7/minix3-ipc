@@ -62,6 +62,8 @@ int do_show_mailboxes(){
     print_access_list(head->receive_access);
     printf("messages: ");
     print_messages_of_mailbox(head->head);
+
+    head = head->next;
   }
   return OK;
 }
@@ -302,10 +304,9 @@ int get_privileges_for_user(int uid) {
   return ERROR;
 }
 
-int create_list(char *access_list_str, uid_node_t *access_list) {
+uid_node_t* create_list(char *access_list_str, uid_node_t *access_list) {
 
   // Initialize access_list
-  access_list = malloc(sizeof(uid_node_t));
   access_list->uid = -1;
 
   access_list->prev = access_list;
@@ -405,6 +406,8 @@ int do_add_mailbox(){
   new_mailbox->number_of_messages = 0;
   new_mailbox->mailbox_type = mailbox_type;
   new_mailbox->mailbox_name = mailbox_name;
+  new_mailbox->send_access = malloc(sizeof(uid_node_t));
+  new_mailbox->receive_access = malloc(sizeof(uid_node_t));
 
   // Add send and receive access lists
   create_list(send_access, new_mailbox->send_access);
@@ -798,9 +801,9 @@ int do_add_sender () {
   int mailboxNameBytes = mailboxNameLen * sizeof(char);
   mailboxName = malloc(mailboxNameBytes);
   sys_datacopy(who_e, (vir_bytes)m_in.m1_p3, SELF, (vir_bytes)mailboxName, mailboxNameBytes);
-  
+
   printf("do_add_sender - Debug line %d\n",2);
-  
+
   //find mailbox
   mailbox_t *mailbox = mailbox_collection->head;
 
