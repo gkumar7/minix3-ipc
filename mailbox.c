@@ -617,7 +617,7 @@ int do_get_from_mailbox()
     char *message;
     int bufferSize = m_in.m1_i1;
     int recipient = m_in.m1_i2;
-    printf("do_get_from_mailbox - Debug line %d\n",1);
+
     printf("Mailbox: get_mail request received from recipient %d. Buffer size: %d\n", recipient, bufferSize);
 
 
@@ -627,73 +627,57 @@ int do_get_from_mailbox()
         return(ERROR);
     }
     //Look for messages in mailboxes
-    printf("do_get_from_mailbox - Debug line %d\n",2);
+
     mailbox_t *mailbox = mailbox_collection->head->next;
-    printf("do_get_from_mailbox - Debug line %d\n",3);
+
     //int found = 0;
 
     //int recipient = m_in.m1_i3;
 
     do {
-      printf("do_get_from_mailbox - Debug line %d\n",4);
+
       // Permission to read?
       int in_permission_list=0;
 
       uid_node_t *uid_p = mailbox->receive_access;
-      printf("do_get_from_mailbox - Debug line %d a\n",5);
+
       uid_p=uid_p->next;
-      printf("do_get_from_mailbox - Debug line %d b\n",5);
+
       while ((uid_p->uid != -1) && !in_permission_list)
       {
-        printf("do_get_from_mailbox - Debug line %d\n",6);
+
         if (recipient == uid_p->uid) {
-          printf("do_get_from_mailbox - Debug line %d a\n",7);
           in_permission_list=1;
         }
         else {
           uid_p = uid_p->next;
-          printf("do_get_from_mailbox - Debug line %d b\n",7);
         }
       }
 
       int permission = ((recipient==0) || ((mailbox->mailbox_type==SECURE)&&in_permission_list)|| ((mailbox->mailbox_type==PUBLIC)&&!in_permission_list)) ? 1 : 0;
 
-      printf("do_get_from_mailbox - Debug line %d\n",8);
-
       if(mailbox->number_of_messages > 0 && permission)
       {
-          printf("do_get_from_mailbox - Debug line %d\n",9);
           int i = 0;
           message_t *message_ptr = mailbox->head->next;
-          printf("do_get_from_mailbox - Debug line %d\n",10);
           // Iterate over existing messages
           while (i < mailbox->number_of_messages)
           {
             if (message_ptr->recipients==NULL) {
-              printf("do_get_from_mailbox - Debug line %d a\n",11);
               //initialize recipients list
               uid_node_t *head = malloc(sizeof(uid_node_t));
-              printf("do_get_from_mailbox - Debug line %d b\n",11);
               head->uid=-1;
-              printf("do_get_from_mailbox - Debug line %d c\n",11);
               head->next = head;
-              printf("do_get_from_mailbox - Debug line %d d\n",11);
               head->prev = head;
-              printf("do_get_from_mailbox - Debug line %d e\n",11);
               message_ptr->recipients=head;
-              printf("do_get_from_mailbox - Debug line %d f\n",11);
             }
-            printf("do_get_from_mailbox - Debug line %d\n",11);
             printf("Mailbox: Checking message number %d\n", i);
             int already_read = 0;
             uid_node_t *recipient_p = message_ptr->recipients->next;
-            printf("do_get_from_mailbox - Debug line %d\n",12);
               // Iterate over messages assigned recipients
               while ((!already_read) && (recipient_p->uid != -1))
               {
-                printf("do_get_from_mailbox - Debug line %d\n",13);
                 printf("Mailbox:Checking uid %d\n", recipient_p->uid);
-                printf("do_get_from_mailbox - Debug line %d\n",14);
                   // If the message has not beer read yet bey current recipient, just consume it
                   if (recipient_p->uid == recipient)
                   {
@@ -703,20 +687,16 @@ int do_get_from_mailbox()
                   else
                   {
                     recipient_p = recipient_p->next;
-                    printf("do_get_from_mailbox - Debug line %d\n",15);
                   }
               }
               if (!already_read) {
-                printf("do_get_from_mailbox - Debug line %d\n",16);
     
                 printf("Mailbox: uid %d success\n", recipient_p->uid);
 
                 int messageBytes = strlen(message_ptr->message) * sizeof(char);
-                printf("do_get_from_mailbox - Debug line %d\n",17);
                 // Copy the content of the message
 
                 sys_datacopy(SELF, (vir_bytes)message_ptr->message, who_e, (vir_bytes)m_in.m1_p1, messageBytes);
-                printf("do_get_from_mailbox - Debug line %d\n",18);
                 printf("Mailbox: Message obtained is %s\n", m_in.m1_p1);
 
                 // Add recipient (received message notification)
@@ -724,34 +704,23 @@ int do_get_from_mailbox()
                 uid_node_t *new_recipient = malloc(sizeof(uid_node_t));
                 new_recipient->uid = recipient;
 
-                printf("do_get_from_mailbox - Debug line %d\n",19);
-
                 new_recipient->next = message_ptr->recipients;
-                printf("do_get_from_mailbox - Debug line %d\n",20);
                 new_recipient->prev = message_ptr->recipients->prev;
 
-                printf("do_get_from_mailbox - Debug line %d\n",21);
                 message_ptr->recipients->prev->next = new_recipient;
-                printf("do_get_from_mailbox - Debug line %d\n",22);
                 message_ptr->recipients->prev = new_recipient;
-                printf("do_get_from_mailbox - Debug line %d\n",23);
 
                 return OK;
               }
               // Increment message pointer and counter
-              printf("do_get_from_mailbox - Debug line %d\n",24);
               message_ptr = message_ptr->next;
-              printf("do_get_from_mailbox - Debug line %d\n",25);
               i++;
           }
       }
-      printf("do_get_from_mailbox - Debug line %d\n",26);
       mailbox = mailbox->next;
-      printf("do_get_from_mailbox - Debug line %d\n",27);
     } while (strcmp("HEAD",mailbox->mailbox_name));
     //} while (!found && strcmp(mailbox_collection->head->mailbox_name,mailbox->mailbox_name));
     // In case of not find a message for the recipient return error
-    printf("do_get_from_mailbox - Debug line %d\n",28);
 
     return ERROR;
 }
