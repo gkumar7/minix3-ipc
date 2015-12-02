@@ -192,7 +192,7 @@ int delete_message (char *mailbox_name, char *subject) {
 
 int add_sender (char *mailbox_name,char *username) {
   struct passwd *pwd = getpwnam(username);
-  int mailbox_name_len = strlen(mailbox_name);
+  int mailbox_name_len = strlen(mailbox_name) + 1;
   if (pwd) {
     message m;
     m.m1_i1 = pwd->pw_uid;

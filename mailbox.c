@@ -795,84 +795,65 @@ int do_delete_message() {
 
 int do_add_sender () {
   char *mailboxName;
-  int uid;
-
-  uid = m_in.m1_i1;
+  int uid = m_in.m1_i1;
   int mailboxNameLen = m_in.m1_i2;
-
-  printf("do_add_sender - Debug line %d\n",1);
 
   int mailboxNameBytes = mailboxNameLen * sizeof(char);
   mailboxName = malloc(mailboxNameBytes);
-  sys_datacopy(who_e, (vir_bytes)m_in.m1_p3, SELF, (vir_bytes)mailboxName, mailboxNameBytes);
-
-  printf("do_add_sender - Debug line %d\n",2);
+  sys_datacopy(who_e, (vir_bytes)m_in.m1_p1, SELF, (vir_bytes)mailboxName, mailboxNameBytes);
 
   //find mailbox
-  mailbox_t *mailbox = mailbox_collection->head;
-
-  printf("do_add_sender - Debug line %d\n",3);
+  mailbox_t *mailbox = mailbox_collection->head->next;
 
   int found = 0;
-  do {
-    printf("do_add_sender - Debug line %d\n",4);
-    if (!strcmp(mailboxName,mailbox->mailbox_name)) {
-      printf("do_add_sender - Debug line %d a\n",5);
+  while (strcmp(mailbox->mailbox_name, "HEAD") != 0){
+    if (strcmp(mailbox->mailbox_name, mailboxName) == 0) {
       found = 1;
     } else {
-      printf("do_add_sender - Debug line %d b\n",5);
       mailbox = mailbox->next;
     }
-  } while (!found && strcmp(mailbox_collection->head->mailbox_name,mailbox->mailbox_name));
+  }
 
   if (!found) {
-    printf("Error: not found mailbox with given name: %s\n",mailboxName);
+    printf("Mailbox: mailbox %s does not exist!\n", mailboxName);
     return ERROR;
   }
 
-  printf("do_add_sender - Debug line %d\n",6);
+  // Check to make sure that the current user is the owner of this mailbox
+  if (mailbox->owner != uid) {
+    printf("Mailbox: user with uid %d is not the owner of mailbox %s\n", uid, mailbox->mailbox_name);
+    return ERROR;
+  }
 
   // Find the user in senders list
   int in_permission_list=0;
 
   uid_node_t *uid_p = mailbox->send_access->next;
 
-  printf("do_add_sender - Debug line %d\n",7);
-
   while ((uid_p->uid != -1) && !in_permission_list)
   {
-    printf("do_add_sender - Debug line %d\n",8);
     if (uid == uid_p->uid) {
-      printf("do_add_sender - Debug line %d\n",9);
       in_permission_list=1;
     }
-    printf("do_add_sender - Debug line %d\n",10);
     uid_p = uid_p->next;
   }
 
   // Return error if the users is already in the list
   if (in_permission_list) {
-    printf("Error: Users is already in the senders list.\n");
+    printf("Error: User with uid %d is already in the senders list.\n", uid);
     return ERROR;
   }
-  printf("do_add_sender - Debug line %d\n",11);
 
   // Add the user to the list
 
   uid_node_t *new_user = malloc(sizeof(uid_node_t));
   new_user->uid = uid;
 
-  printf("do_add_sender - Debug line %d\n",12);
-
   new_user->next = mailbox->send_access;
   new_user->prev = mailbox->send_access->prev;
 
-  printf("do_add_sender - Debug line %d\n",13);
-
   mailbox->send_access->prev->next = new_user;
   mailbox->send_access->prev = new_user;
-
-  printf("do_add_sender - Debug line %d\n",14);
 
   return OK;
 }
