@@ -761,7 +761,7 @@ int do_delete_message() {
   //check owner
   int privileges = get_privileges_for_user(caller_uid);
   if ((privileges & 0b0100) == 0b0100) {
-    printf("Error: user with uid %d does not have remove_message privilege for mailbox %s\n", uid, mailbox->mailbox_name);
+    printf("Error: user with uid %d does not have remove_message privilege for mailbox %s\n", caller_uid, mailbox->mailbox_name);
     return ERROR;
   }
 
@@ -822,7 +822,7 @@ int do_add_sender () {
   // Check privileges
   int privileges = get_privileges_for_user(caller_uid);
   if ((privileges & 0b0010) == 0b0010) {
-    printf("Error: user with uid %d does not have add_sender privilege for mailbox %s\n", uid, mailbox->mailbox_name);
+    printf("Error: user with uid %d does not have add_sender privilege for mailbox %s\n", caller_uid, mailbox->mailbox_name);
     return ERROR;
   }
 
@@ -891,7 +891,7 @@ int do_add_receiver () {
 
   int privileges = get_privileges_for_user(caller_uid);
   if ((privileges & 0b0001) == 0b0001) {
-    printf("Error: user with uid %d does not have add_receiver privilege for mailbox %s\n", uid, mailbox->mailbox_name);
+    printf("Error: user with uid %d does not have add_receiver privilege for mailbox %s\n", caller_uid, mailbox->mailbox_name);
     return ERROR;
   }
 
@@ -960,7 +960,7 @@ int do_remove_sender () {
   // Check to make sure that the current user is the owner of this mailbox
   int privileges = get_privileges_for_user(caller_uid);
   if ((privileges & 0b0010) == 0b0010) {
-    printf("Error: user with uid %d does not have remove_sender privilege for mailbox %s\n", uid, mailbox->mailbox_name);
+    printf("Error: user with uid %d does not have remove_sender privilege for mailbox %s\n", caller_uid, mailbox->mailbox_name);
     return ERROR;
   }
 
@@ -1018,7 +1018,7 @@ int do_remove_receiver () {
 
   int privileges = get_privileges_for_user(caller_uid);
   if ((privileges & 0b0001) == 0b0001) {
-    printf("Error: user with uid %d does not have remove_receiver privilege for mailbox %s\n", uid, mailbox->mailbox_name);
+    printf("Error: user with uid %d does not have remove_receiver privilege for mailbox %s\n", caller_uid, mailbox->mailbox_name);
     return ERROR;
   }
 
