@@ -5,6 +5,9 @@ Secure IPC between user processes
 * [MINIX 3 Github Mirror](https://github.com/minix3/minix)
 * [MINIX 3 Official Docs](http://www.minix3.org/)
 
+#### Prerequisites
+* Before running any of the below extensions, MINIX 3 must be installed and the world should be rebuilt following these guidelines: [MINIX 3 Rebuilding the System](http://wiki.minix3.org/doku.php?id=developersguide:rebuildingsystem)
+
 #### shell - Shell Implementation
 A simple shell which incorporates a few extra features other than the classic fork and execution of processes.
 
