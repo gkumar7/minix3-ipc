@@ -33,6 +33,6 @@ tests/
 
 #### Getting Started
 ```sh
-# Will move files to appropriate directories in the MINIX 3 hierarchy and will re-compile the kernel
+# Will move files to appropriate directories in the MINIX 3 hierarchy and re-compile the kernel
 ./update-files.sh
 ```

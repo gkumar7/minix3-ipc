@@ -11,3 +11,13 @@
  * A “secure mailbox” can be used only by designated users, and each user is given the capability to send to or receive from the mailbox or both.
  * A “public mailbox” can be used by any user, except those who are specifically denied send or receive access.
  * A mailbox can be removed by its owner and the super user and no one else.
+
+#### Getting Started
+```sh
+# Will move files to appropriate directories in the MINIX 3 hierarchy and re-compile the kernel
+./update-files.sh
+
+# To compile all tests
+cd tests
+./compileAll.sh
+```
